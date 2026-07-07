@@ -36,7 +36,7 @@ namespace Dittle
 
         private static void AddMovesForDie(Board board, int x, int y, Die die, List<Move> moves)
         {
-            int forwardY = (die.Owner == Player.Yellow) ? -1 : 1;
+            int forwardY = (die.Owner == Player.White) ? -1 : 1;
 
             // 1. TILT FORWARD
             TryAddTilt(board, x, y, 0, forwardY, die, moves);
@@ -65,7 +65,7 @@ namespace Dittle
 
         private static void AddJumps(Board board, int originalX, int originalY, int fromX, int fromY, Die die, List<Move> moves, bool afterTilt)
         {
-            int forwardY = (die.Owner == Player.Yellow) ? -1 : 1;
+            int forwardY = (die.Owner == Player.White) ? -1 : 1;
 
             // Straight Vertical
             AddStraightJump(board, originalX, originalY, fromX, fromY, 0, forwardY, die, moves);
@@ -210,12 +210,12 @@ namespace Dittle
                     Die? d = board.Grid[x, y];
                     if (d.HasValue)
                     {
-                        if (d.Value.Owner == Player.Yellow && y == 0)
+                        if (d.Value.Owner == Player.White && y == 0)
                         {
                             yellowInBase++;
                             yellowScore += d.Value.Top;
                         }
-                        else if (d.Value.Owner == Player.Green && y == Board.Size - 1)
+                        else if (d.Value.Owner == Player.Black && y == Board.Size - 1)
                         {
                             greenInBase++;
                             greenScore += d.Value.Top;
@@ -228,8 +228,8 @@ namespace Dittle
             if (yellowInBase == 7 || greenInBase == 7)
             {
                 // Winner is the one with the higher score in their respective goal row
-                if (yellowScore > greenScore) winner = Player.Yellow;
-                else if (greenScore > yellowScore) winner = Player.Green;
+                if (yellowScore > greenScore) winner = Player.White;
+                else if (greenScore > yellowScore) winner = Player.Black;
                 else winner = null; // Draw (possible in rules?)
                 return true;
             }
@@ -248,7 +248,7 @@ namespace Dittle
                     Die? d = board.Grid[x, y];
                     if (d.HasValue)
                     {
-                        if (d.Value.Owner == Player.Yellow)
+                        if (d.Value.Owner == Player.White)
                         {
                             // Priority 1: High value in base row
                             if (y == 0) yellowTotal += (d.Value.Top * 100);
@@ -271,7 +271,7 @@ namespace Dittle
                 if (winner != null) return -1000000;
             }
 
-            return (player == Player.Yellow) ? (yellowTotal - greenTotal) : (greenTotal - yellowTotal);
+            return (player == Player.White) ? (yellowTotal - greenTotal) : (greenTotal - yellowTotal);
         }
     }
 }

@@ -26,10 +26,10 @@ namespace Dittle
             Raylib.InitWindow(BOARD_SIZE_X, BOARD_SIZE_Y, "Dittle");
             Raylib.SetTargetFPS(60);
 
-            Board board = new Board();
-            Player currentPlayer = Player.Yellow;
+            Board board = new();
+            Player currentPlayer = Player.White;
             int? selectedX = null, selectedY = null;
-            List<Move> legalMoves = new List<Move>();
+            List<Move> legalMoves = [];
 
             // AI Animation State
             Move? lastAiMove = null;
@@ -44,16 +44,16 @@ namespace Dittle
                 if (Rules.IsGameOver(board, out Player? winner))
                 {
                 }
-                else if (playersCount == 1 && currentPlayer == Player.Green && aiMoveTimer <= 0)
+                else if (playersCount == 1 && currentPlayer == Player.Black && aiMoveTimer <= 0)
                 {
-                    Move? best = AI.GetBestMove(board, Player.Green, aiDepth);
+                    Move? best = AI.GetBestMove(board, Player.Black, aiDepth);
                     if (best.HasValue)
                     {
                         lastAiMove = best.Value;
                         AI.ApplyMove(board, best.Value);
                         aiMoveTimer = AI_MOVE_DISPLAY_TIME;
                     }
-                    currentPlayer = Player.Yellow;
+                    currentPlayer = Player.White;
                 }
                 else
                 {
@@ -65,9 +65,9 @@ namespace Dittle
 
                         if (board.IsInBounds(x, y))
                         {
-                            Die? d = board.Grid[x, y];
                             if (selectedX == null)
                             {
+                                Die? d = board.Grid[x, y];
                                 if (d is not null && d.HasValue && d.Value.Owner == currentPlayer)
                                 {
                                     selectedX = x;
@@ -82,7 +82,7 @@ namespace Dittle
                                 if (move.FromX == selectedX && move.FromY == selectedY)
                                 {
                                     AI.ApplyMove(board, move);
-                                    currentPlayer = (currentPlayer == Player.Yellow) ? Player.Green : Player.Yellow;
+                                    currentPlayer = (currentPlayer == Player.White) ? Player.Black : Player.White;
                                     selectedX = null;
                                     selectedY = null;
                                     legalMoves.Clear();
@@ -180,10 +180,12 @@ namespace Dittle
 
         static void DrawDie(int x, int y, int size, Die die)
         {
-            Color dieColor = die.Owner == Player.Yellow ? Color.Yellow : Color.Green;
+            Color dieColor = die.Owner == Player.White ? Color.White : Color.Black;
+            Color pipColor = die.Owner == Player.White ? Color.Black : Color.White;
+
             Rectangle rec = new(x, y, size, size);
             Raylib.DrawRectangleRounded(rec, 0.2f, 10, dieColor);
-            Raylib.DrawRectangleRoundedLines(rec, 0.2f, 10, Color.Black);
+            Raylib.DrawRectangleRoundedLines(rec, 0.2f, 10, Color.Gray);
 
             int r = size / 10;
             int m = size / 2;
@@ -192,52 +194,52 @@ namespace Dittle
 
             switch (die.Top)
             {
-                case 1: DrawPips1(x, y, m, r); break;
-                case 2: DrawPips2(x, y, q1, q3, r); break;
-                case 3: DrawPips3(x, y, m, q1, q3, r); break;
-                case 4: DrawPips4(x, y, q1, q3, r); break;
-                case 5: DrawPips5(x, y, m, q1, q3, r); break;
-                case 6: DrawPips6(x, y, m, q1, q3, r); break;
+                case 1: DrawPips1(x, y, m, r, pipColor); break;
+                case 2: DrawPips2(x, y, q1, q3, r, pipColor); break;
+                case 3: DrawPips3(x, y, m, q1, q3, r, pipColor); break;
+                case 4: DrawPips4(x, y, q1, q3, r, pipColor); break;
+                case 5: DrawPips5(x, y, m, q1, q3, r, pipColor); break;
+                case 6: DrawPips6(x, y, m, q1, q3, r, pipColor); break;
             }
         }
 
-        private static void DrawPips1(int x, int y, int m, int r) =>
-            Raylib.DrawCircle(x + m, y + m, r, Color.Black);
+        private static void DrawPips1(int x, int y, int m, int r, Color c) =>
+            Raylib.DrawCircle(x + m, y + m, r, c);
 
-        private static void DrawPips2(int x, int y, int q1, int q3, int r)
+        private static void DrawPips2(int x, int y, int q1, int q3, int r, Color c)
         {
-            Raylib.DrawCircle(x + q1, y + q1, r, Color.Black);
-            Raylib.DrawCircle(x + q3, y + q3, r, Color.Black);
+            Raylib.DrawCircle(x + q1, y + q1, r, c);
+            Raylib.DrawCircle(x + q3, y + q3, r, c);
         }
 
-        private static void DrawPips3(int x, int y, int m, int q1, int q3, int r)
+        private static void DrawPips3(int x, int y, int m, int q1, int q3, int r, Color c)
         {
-            Raylib.DrawCircle(x + m, y + m, r, Color.Black);
-            DrawPips2(x, y, q1, q3, r);
+            Raylib.DrawCircle(x + m, y + m, r, c);
+            DrawPips2(x, y, q1, q3, r, c);
         }
 
-        private static void DrawPips4(int x, int y, int q1, int q3, int r)
+        private static void DrawPips4(int x, int y, int q1, int q3, int r, Color c)
         {
-            Raylib.DrawCircle(x + q1, y + q1, r, Color.Black);
-            Raylib.DrawCircle(x + q3, y + q1, r, Color.Black);
-            Raylib.DrawCircle(x + q1, y + q3, r, Color.Black);
-            Raylib.DrawCircle(x + q3, y + q3, r, Color.Black);
+            Raylib.DrawCircle(x + q1, y + q1, r, c);
+            Raylib.DrawCircle(x + q3, y + q1, r, c);
+            Raylib.DrawCircle(x + q1, y + q3, r, c);
+            Raylib.DrawCircle(x + q3, y + q3, r, c);
         }
 
-        private static void DrawPips5(int x, int y, int m, int q1, int q3, int r)
+        private static void DrawPips5(int x, int y, int m, int q1, int q3, int r, Color c)
         {
-            Raylib.DrawCircle(x + m, y + m, r, Color.Black);
-            DrawPips4(x, y, q1, q3, r);
+            Raylib.DrawCircle(x + m, y + m, r, c);
+            DrawPips4(x, y, q1, q3, r, c);
         }
 
-        private static void DrawPips6(int x, int y, int m, int q1, int q3, int r)
+        private static void DrawPips6(int x, int y, int m, int q1, int q3, int r, Color c)
         {
-            Raylib.DrawCircle(x + q1, y + q1, r, Color.Black);
-            Raylib.DrawCircle(x + q3, y + q1, r, Color.Black);
-            Raylib.DrawCircle(x + q1, y + m, r, Color.Black);
-            Raylib.DrawCircle(x + q3, y + m, r, Color.Black);
-            Raylib.DrawCircle(x + q1, y + q3, r, Color.Black);
-            Raylib.DrawCircle(x + q3, y + q3, r, Color.Black);
+            Raylib.DrawCircle(x + q1, y + q1, r, c);
+            Raylib.DrawCircle(x + q3, y + q1, r, c);
+            Raylib.DrawCircle(x + q1, y + m, r, c);
+            Raylib.DrawCircle(x + q3, y + m, r, c);
+            Raylib.DrawCircle(x + q1, y + q3, r, c);
+            Raylib.DrawCircle(x + q3, y + q3, r, c);
         }
     }
 }

@@ -9,7 +9,7 @@ using System;
 
 namespace Dittle
 {
-    public enum Player { Yellow, Green }
+    public enum Player { White, Black }
 
     public struct Die
     {
@@ -17,8 +17,8 @@ namespace Dittle
         // 0: Top, 1: Bottom, 2: Front (Up screen), 3: Back (Down screen), 4: Left, 5: Right
         public int[] Faces;
 
-        public int Top => Faces[0];
-        public int Front => Faces[2];
+        public int Top => (Faces != null && Faces.Length > 0) ? Faces[0] : 0;
+        public int Front => (Faces != null && Faces.Length > 2) ? Faces[2] : 0;
 
         public Die(Player owner, int top, int front)
         {
@@ -77,9 +77,9 @@ namespace Dittle
         public int GetForwardValue()
         {
             if (Faces == null) return 0;
-            // For Yellow, forward is Up (-y). Tilt UP screen makes old Back become Top.
-            // For Green, forward is Down (+y). Tilt DOWN screen makes old Front become Top.
-            return Owner == Player.Yellow ? Faces[3] : Faces[2];
+            // For White, forward is Up (-y). Tilt UP screen makes old Back become Top.
+            // For Black, forward is Down (+y). Tilt DOWN screen makes old Front become Top.
+            return Owner == Player.White ? Faces[3] : Faces[2];
         }
 
         public int GetRightValue()
@@ -142,17 +142,17 @@ namespace Dittle
 
         public Board()
         {
-            // Yellow (Bottom): 4 is facing Center (UP screen / Front)
+            // White (Bottom): 4 is facing Center (UP screen / Front)
             for (int x = 0; x < Size; x++)
             {
-                Grid[x, 6] = new Die(Player.Yellow, 6, 4);
+                Grid[x, 6] = new Die(Player.White, 6, 4);
             }
 
-            // Green (Top): 4 is facing Center (DOWN screen / Back)
+            // Black (Top): 4 is facing Center (DOWN screen / Back)
             // If 4 is Back (idx 3), then Front (idx 2) is 3.
             for (int x = 0; x < Size; x++)
             {
-                Grid[x, 0] = new Die(Player.Green, 6, 3);
+                Grid[x, 0] = new Die(Player.Black, 6, 3);
             }
         }
 

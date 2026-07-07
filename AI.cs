@@ -32,7 +32,7 @@ namespace Dittle
                 return Rules.Evaluate(board, player);
             }
 
-            Player current = maximizing ? player : (player == Player.Yellow ? Player.Green : Player.Yellow);
+            Player current = maximizing ? player : (player == Player.White ? Player.Black : Player.White);
             List<Move> moves = Rules.GetAllLegalMoves(board, current);
 
             if (maximizing)
