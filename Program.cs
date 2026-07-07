@@ -62,36 +62,35 @@ namespace Dittle
                         int x = (int)(mouse.X / OFFSET) - 1;
                         int y = (int)(mouse.Y / OFFSET) - 1;
 
-                        if (board.IsInBounds(x, y))
+                        if (!board.IsInBounds(x, y)) return;
+
+                        if (selectedX == null)
                         {
-                            if (selectedX == null)
+                            Die? d = board.Grid[x, y];
+                            if (d.HasValue && d.Value.Owner == currentPlayer)
                             {
-                                Die? d = board.Grid[x, y];
-                                if (d.HasValue && d.Value.Owner == currentPlayer)
-                                {
-                                    selectedX = x;
-                                    selectedY = y;
-                                    legalMoves = Rules.GetAllLegalMoves(board, currentPlayer);
-                                    legalMoves = legalMoves.FindAll(m => m.FromX == x && m.FromY == y);
-                                }
+                                selectedX = x;
+                                selectedY = y;
+                                legalMoves = Rules.GetAllLegalMoves(board, currentPlayer);
+                                legalMoves = legalMoves.FindAll(m => m.FromX == x && m.FromY == y);
+                            }
+                        }
+                        else
+                        {
+                            Move move = legalMoves.Find(m => m.ToX == x && m.ToY == y);
+                            if (move.FromX == selectedX && move.FromY == selectedY)
+                            {
+                                AI.ApplyMove(board, move);
+                                currentPlayer = (currentPlayer == Player.Yellow) ? Player.Green : Player.Yellow;
+                                selectedX = null;
+                                selectedY = null;
+                                legalMoves.Clear();
                             }
                             else
                             {
-                                Move move = legalMoves.Find(m => m.ToX == x && m.ToY == y);
-                                if (move.FromX == selectedX && move.FromY == selectedY)
-                                {
-                                    AI.ApplyMove(board, move);
-                                    currentPlayer = (currentPlayer == Player.Yellow) ? Player.Green : Player.Yellow;
-                                    selectedX = null;
-                                    selectedY = null;
-                                    legalMoves.Clear();
-                                }
-                                else
-                                {
-                                    selectedX = null;
-                                    selectedY = null;
-                                    legalMoves.Clear();
-                                }
+                                selectedX = null;
+                                selectedY = null;
+                                legalMoves.Clear();
                             }
                         }
                     }
@@ -124,14 +123,15 @@ namespace Dittle
                     Raylib.DrawRectangle(px, py, size, size, Color.Beige);
                     Raylib.DrawRectangleLines(px, py, size, size, Color.Brown);
 
-                    if (selX == x && selY == y)
-                        Raylib.DrawRectangleLinesEx(new Rectangle(px, py, size, size), 3, Color.Blue);
-
                     foreach (var m in legalMoves)
                     {
                         if (m.ToX == x && m.ToY == y)
-                            Raylib.DrawCircle(px + size / 2, py + size / 2, 5, Color.Blue);
+                        {
+                            Raylib.DrawCircle(px + size / 2, py + size / 2, 15, Color.Blue);
+                            Raylib.DrawText(m.ResultDie.Top.ToString(), px + size / 2 - 5, py + size / 2 - 10, 20, Color.White);
+                        }
                     }
+
 
                     Die? d = board.Grid[x, y];
                     if (d is not null && d.HasValue)

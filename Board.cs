@@ -40,7 +40,7 @@ namespace Dittle
             Faces[4] = 7 - right;
         }
 
-        private static int CalculateRightFace(int top, int front)
+        public static int CalculateRightFace(int top, int front)
         {
             return (top, front) switch
             {
@@ -63,7 +63,7 @@ namespace Dittle
             };
         }
 
-        private static int CalculateRight(int top, int front)
+        public static int CalculateRight(int top, int front)
         {
             if (top == 1) return front == 2 ? 3 : (front == 3 ? 5 : (front == 5 ? 4 : 2));
             if (top == 2) return front == 1 ? 4 : (front == 4 ? 6 : (front == 6 ? 3 : 1));
@@ -72,6 +72,28 @@ namespace Dittle
             if (top == 5) return front == 1 ? 3 : (front == 3 ? 6 : (front == 6 ? 4 : 1));
             if (top == 6) return front == 2 ? 4 : (front == 4 ? 5 : (front == 5 ? 3 : 2));
             return 0;
+        }
+
+        public int GetForwardValue()
+        {
+            if (Faces == null) return 0;
+            // For Yellow, forward is Up (-y). Tilt UP screen makes old Back become Top.
+            // For Green, forward is Down (+y). Tilt DOWN screen makes old Front become Top.
+            return Owner == Player.Yellow ? Faces[3] : Faces[2];
+        }
+
+        public int GetRightValue()
+        {
+            if (Faces == null) return 0;
+            // Tilt RIGHT: Left face (idx 4) becomes Top.
+            return Faces[4];
+        }
+
+        public int GetLeftValue()
+        {
+            if (Faces == null) return 0;
+            // Tilt LEFT: Right face (idx 5) becomes Top.
+            return Faces[5];
         }
 
         public readonly Die Tilted(int dx, int dy)
@@ -136,7 +158,7 @@ namespace Dittle
 
         public Board Clone()
         {
-            Board b = new Board();
+            Board b = new();
             for (int y = 0; y < Size; y++)
                 for (int x = 0; x < Size; x++)
                     b.Grid[x, y] = this.Grid[x, y];
