@@ -89,16 +89,19 @@ namespace Dittle
             int tx = fromX + dx;
             int ty = fromY + dy;
 
+            if (!CanStartJump(board, tx, ty, originalX, originalY)) return;
+
+            ProcessJumpSequence(board, originalX, originalY, tx, ty, dx, dy, die, moves);
+        }
+
+        private static bool CanStartJump(Board board, int tx, int ty, int originalX, int originalY)
+        {
             // Rule: To jump, you must jump over a die that is IMMEDIATELY adjacent.
-            // "Jump over one or more dice... there must be at least one empty space between each die"
-            // Usually in Dittle, jumping starts by moving into the adjacent die's space (conceptually)
-            // The prompt says: "You can only jump when you are right next to another die"
+            return board.IsInBounds(tx, ty) && IsOccupied(board, tx, ty, originalX, originalY);
+        }
 
-            if (!board.IsInBounds(tx, ty)) return;
-            bool firstSquareOccupied = IsOccupied(board, tx, ty, originalX, originalY);
-
-            if (!firstSquareOccupied) return; // Cannot jump if the first square is a gap
-
+        private static void ProcessJumpSequence(Board board, int originalX, int originalY, int tx, int ty, int dx, int dy, Die die, List<Move> moves)
+        {
             bool onDie = true;
             tx += dx;
             ty += dy;
@@ -108,28 +111,14 @@ namespace Dittle
                 bool occupied = IsOccupied(board, tx, ty, originalX, originalY);
                 if (onDie)
                 {
-                    // Was on a die, now MUST be a gap
-                    if (occupied) return; // Illegal: tight cluster (no gap)
+                    if (occupied) return; // Illegal: tight cluster
                     onDie = false;
-                    // Landing in this gap is valid
                     moves.Add(new Move(originalX, originalY, tx, ty, die));
                 }
                 else
                 {
-                    // Was in a gap, can we find another die?
-                    if (occupied)
-                    {
-                        onDie = true;
-                    }
-                    else
-                    {
-                        // Multiple gaps in a row?
-                        // "at least one empty space between each die"
-                        // Usually jumps end at the first gap after a die,
-                        // or can continue if there's another die to jump.
-                        // Let's stop at the gap to prevent "flying" across the board.
-                        return;
-                    }
+                    if (occupied) onDie = true;
+                    else return; // Stop at multiple gaps
                 }
                 tx += dx;
                 ty += dy;
@@ -209,12 +198,48 @@ namespace Dittle
         public static bool IsGameOver(Board board, out Player? winner)
         {
             winner = null;
-            bool yellowDone = true;
-            bool greenDone = true;
+            int yellowInBase = 0;
+            int greenInBase = 0;
             int yellowScore = 0;
             int greenScore = 0;
-            int yellowCount = 0;
-            int greenCount = 0;
+
+            for (int y = 0; y < Board.Size; y++)
+            {
+                for (int x = 0; x < Board.Size; x++)
+                {
+                    Die? d = board.Grid[x, y];
+                    if (d.HasValue)
+                    {
+                        if (d.Value.Owner == Player.Yellow && y == 0)
+                        {
+                            yellowInBase++;
+                            yellowScore += d.Value.Top;
+                        }
+                        else if (d.Value.Owner == Player.Green && y == Board.Size - 1)
+                        {
+                            greenInBase++;
+                            greenScore += d.Value.Top;
+                        }
+                    }
+                }
+            }
+
+            // Game ends when ONE player gets ALL 7 dice in the opponent's base row
+            if (yellowInBase == 7 || greenInBase == 7)
+            {
+                // Winner is the one with the higher score in their respective goal row
+                if (yellowScore > greenScore) winner = Player.Yellow;
+                else if (greenScore > yellowScore) winner = Player.Green;
+                else winner = null; // Draw (possible in rules?)
+                return true;
+            }
+            return false;
+        }
+
+        public static int Evaluate(Board board, Player player)
+        {
+            int yellowTotal = 0;
+            int greenTotal = 0;
 
             for (int y = 0; y < Board.Size; y++)
             {
@@ -225,44 +250,28 @@ namespace Dittle
                     {
                         if (d.Value.Owner == Player.Yellow)
                         {
-                            yellowCount++;
-                            if (y != 0) yellowDone = false;
-                            else yellowScore += d.Value.Top;
+                            // Priority 1: High value in base row
+                            if (y == 0) yellowTotal += (d.Value.Top * 100);
+                            // Priority 2: Getting into base row
+                            else yellowTotal += (6 - y) * 10 + d.Value.Top;
                         }
                         else
                         {
-                            greenCount++;
-                            if (y != Board.Size - 1) greenDone = false;
-                            else greenScore += d.Value.Top;
+                            if (y == 6) greenTotal += (d.Value.Top * 100);
+                            else greenTotal += y * 10 + d.Value.Top;
                         }
                     }
                 }
             }
 
-            if (yellowDone && yellowCount == 7) { winner = Player.Yellow; return true; }
-            if (greenDone && greenCount == 7) { winner = Player.Green; return true; }
-            return false;
-        }
-
-        public static int Evaluate(Board board, Player player)
-        {
-            int score = 0;
-            for (int y = 0; y < Board.Size; y++)
+            // Check if game is over to award massive win bonus
+            if (IsGameOver(board, out Player? winner))
             {
-                for (int x = 0; x < Board.Size; x++)
-                {
-                    Die? d = board.Grid[x, y];
-                    if (d.HasValue)
-                    {
-                        int val = d.Value.Top;
-                        int progress = (d.Value.Owner == Player.Yellow) ? (6 - y) : y;
-                        int points = val + progress * 2;
-                        if (d.Value.Owner == player) score += points;
-                        else score -= points;
-                    }
-                }
+                if (winner == player) return 1000000;
+                if (winner != null) return -1000000;
             }
-            return score;
+
+            return (player == Player.Yellow) ? (yellowTotal - greenTotal) : (greenTotal - yellowTotal);
         }
     }
 }
