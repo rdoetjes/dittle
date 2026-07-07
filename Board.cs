@@ -23,44 +23,44 @@ namespace Dittle
         public Die(Player owner, int top, int front)
         {
             Owner = owner;
-            Faces = new int[6];
-            Faces[0] = top;
-            Faces[1] = 7 - top;
-            Faces[2] = front;
-            Faces[3] = 7 - front;
 
-            // For a standard right-handed die:
-            // We need to determine the Right face (index 5)
-            int right = 0;
-            if (top == 6)
-            {
-                if (front == 4) right = 2;
-                else if (front == 2) right = 3;
-                else if (front == 3) right = 5;
-                else if (front == 5) right = 4;
-            }
-            else if (top == 3)
-            {
-                if (front == 6) right = 2;
-                else if (front == 2) right = 1;
-                else if (front == 1) right = 5;
-                else if (front == 5) right = 6;
-            }
-            else if (top == 5)
-            {
-                if (front == 6) right = 3;
-                else if (front == 3) right = 1;
-                else if (front == 1) right = 4;
-                else if (front == 4) right = 6;
-            }
-            else
-            {
-                // Fallback for initial mapping if needed
-                right = CalculateRight(top, front);
-            }
+            Faces =
+            [
+                top,
+                7 - top,
+                front,
+                7 - front,
+                0, // filled below
+                0  // filled below
+            ];
+
+            int right = CalculateRightFace(top, front);
 
             Faces[5] = right;
             Faces[4] = 7 - right;
+        }
+
+        private static int CalculateRightFace(int top, int front)
+        {
+            return (top, front) switch
+            {
+                (6, 4) => 2,
+                (6, 2) => 3,
+                (6, 3) => 5,
+                (6, 5) => 4,
+
+                (3, 6) => 2,
+                (3, 2) => 1,
+                (3, 1) => 5,
+                (3, 5) => 6,
+
+                (5, 6) => 3,
+                (5, 3) => 1,
+                (5, 1) => 4,
+                (5, 4) => 6,
+
+                _ => CalculateRight(top, front)
+            };
         }
 
         private static int CalculateRight(int top, int front)
