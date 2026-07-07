@@ -7,6 +7,20 @@ namespace Dittle
 {
     class Program
     {
+        const int OFFSET = 60;
+        const int SIZE = 50;
+        const int BOARD_SIZE_X = 500;
+        const int BOARD_SIZE_Y = 500;
+
+        public static void DrawUI(Board board, Player currentPlayer)
+        {
+            Raylib.DrawText($"Turn: {currentPlayer}", 10, 10, 20, Color.White);
+            if (Rules.IsGameOver(board, out Player? w))
+            {
+                Raylib.DrawText($"WINNER: {w}", BOARD_SIZE_X / 2 - 200, BOARD_SIZE_Y / 2, 40, Color.Red);
+            }
+        }
+
         public static void Main(string[] args)
         {
             int playersCount = 1;
@@ -18,7 +32,7 @@ namespace Dittle
                 if (args[i] == "-depth" && i + 1 < args.Length) aiDepth = int.Parse(args[++i]);
             }
 
-            Raylib.InitWindow(800, 800, "Dittle");
+            Raylib.InitWindow(BOARD_SIZE_X, BOARD_SIZE_Y, "Dittle");
             Raylib.SetTargetFPS(60);
 
             Board board = new();
@@ -45,8 +59,8 @@ namespace Dittle
                     if (Raylib.IsMouseButtonPressed(MouseButton.Left))
                     {
                         Vector2 mouse = Raylib.GetMousePosition();
-                        int x = (int)(mouse.X / 100) - 1;
-                        int y = (int)(mouse.Y / 100) - 1;
+                        int x = (int)(mouse.X / OFFSET) - 1;
+                        int y = (int)(mouse.Y / OFFSET) - 1;
 
                         if (board.IsInBounds(x, y))
                         {
@@ -87,12 +101,7 @@ namespace Dittle
                 Raylib.ClearBackground(Color.DarkGray);
 
                 DrawBoard(board, selectedX, selectedY, legalMoves);
-
-                Raylib.DrawText($"Turn: {currentPlayer}", 10, 10, 20, Color.White);
-                if (Rules.IsGameOver(board, out Player? w))
-                {
-                    Raylib.DrawText($"WINNER: {w}", 300, 400, 40, Color.Red);
-                }
+                DrawUI(board, currentPlayer);
 
                 Raylib.EndDrawing();
             }
@@ -102,8 +111,8 @@ namespace Dittle
 
         static void DrawBoard(Board board, int? selX, int? selY, List<Move> legalMoves)
         {
-            int offset = 100;
-            int size = 80;
+            int offset = OFFSET;
+            int size = SIZE;
 
             for (int y = 0; y < Board.Size; y++)
             {
@@ -129,7 +138,7 @@ namespace Dittle
                     {
                         Color c = d.Value.Owner == Player.Yellow ? Color.Yellow : Color.Green;
                         Raylib.DrawRectangle(px + 10, py + 10, size - 20, size - 20, c);
-                        Raylib.DrawText(d.Value.Top.ToString(), px + 30, py + 25, 30, Color.Black);
+                        Raylib.DrawText(d.Value.Top.ToString(), px + 20, py + 18, 20, Color.Black);
                     }
                 }
             }
