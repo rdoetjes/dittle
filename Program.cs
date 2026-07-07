@@ -50,9 +50,10 @@ namespace Dittle
 
                         if (board.IsInBounds(x, y))
                         {
-                            if (selectedX == null && board.Grid[x, y] != null)
+                            if (selectedX == null)
                             {
-                                if (board.Grid[x, y].HasValue && board.Grid[x, y].Value.Owner == currentPlayer)
+                                Die? d = board.Grid[x, y];
+                                if (d.HasValue && d.Value.Owner == currentPlayer)
                                 {
                                     selectedX = x;
                                     selectedY = y;
@@ -124,7 +125,7 @@ namespace Dittle
                     }
 
                     Die? d = board.Grid[x, y];
-                    if (d.HasValue)
+                    if (d is not null && d.HasValue)
                     {
                         Color c = d.Value.Owner == Player.Yellow ? Color.Yellow : Color.Green;
                         Raylib.DrawRectangle(px + 10, py + 10, size - 20, size - 20, c);
