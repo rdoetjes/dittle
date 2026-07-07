@@ -74,7 +74,7 @@ namespace Dittle
             return 0;
         }
 
-        readonly public Die Tilted(int dx, int dy)
+        public readonly Die Tilted(int dx, int dy)
         {
             int[] newFaces = (int[])Faces.Clone();
 
@@ -143,7 +143,7 @@ namespace Dittle
             return b;
         }
 
-        public static bool IsInBounds(int x, int y) => x >= 0 && x < Size && y >= 0 && y < Size;
+        public bool IsInBounds(int x, int y) => x >= 0 && x < Size && y >= 0 && y < Size;
 
         public Die?[,] GetBoard() => Grid;
     }
