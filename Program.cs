@@ -9,12 +9,6 @@ namespace Dittle
     {
         public static void Main(string[] args)
         {
-            if (args.Length > 0 && args[0] == "--test")
-            {
-                RunManualTests();
-                return;
-            }
-
             int playersCount = 1;
             int aiDepth = 3;
 
@@ -27,10 +21,10 @@ namespace Dittle
             Raylib.InitWindow(800, 800, "Dittle");
             Raylib.SetTargetFPS(60);
 
-            Board board = new Board();
+            Board board = new();
             Player currentPlayer = Player.Yellow;
             int? selectedX = null, selectedY = null;
-            List<Move> legalMoves = new List<Move>();
+            List<Move> legalMoves = [];
 
             while (!Raylib.WindowShouldClose())
             {
@@ -56,7 +50,7 @@ namespace Dittle
 
                         if (board.IsInBounds(x, y))
                         {
-                            if (selectedX == null)
+                            if (selectedX == null && board.Grid[x, y] != null)
                             {
                                 if (board.Grid[x, y].HasValue && board.Grid[x, y].Value.Owner == currentPlayer)
                                 {
@@ -138,72 +132,6 @@ namespace Dittle
                     }
                 }
             }
-        }
-
-        private static void RunManualTests()
-        {
-            Console.WriteLine("Running Manual Rules Validation...");
-            Board board = new Board();
-            for (int y = 0; y < 7; y++) for (int x = 0; x < 7; x++) board.Grid[x, y] = null;
-
-            // Test 1: Adjacency Requirement
-            board.Grid[3, 3] = new Die(Player.Yellow, 6, 4);
-            var moves = Rules.GetAllLegalMoves(board, Player.Yellow);
-            bool hasLongJump = moves.Exists(m => Math.Abs(m.FromX - m.ToX) > 1 || Math.Abs(m.FromY - m.ToY) > 1);
-            Console.WriteLine("Test 1 (No adjacent die -> No jump): " + (!hasLongJump ? "PASSED" : "FAILED"));
-
-            // Test 2: Valid Jump
-            board.Grid[3, 2] = new Die(Player.Green, 1, 4);
-            moves = Rules.GetAllLegalMoves(board, Player.Yellow);
-            bool hasValidJump = moves.Exists(m => m.ToX == 3 && m.ToY == 1);
-            Console.WriteLine("Test 2 (Adjacent die -> Valid jump): " + (hasValidJump ? "PASSED" : "FAILED"));
-
-            // Test 3: Tight Cluster
-            board.Grid[3, 1] = new Die(Player.Green, 1, 4);
-            moves = Rules.GetAllLegalMoves(board, Player.Yellow);
-            bool jumpOverCluster = moves.Exists(m => m.ToX == 3 && m.ToY == 0);
-            Console.WriteLine("Test 3 (Tight cluster -> No jump): " + (!jumpOverCluster ? "PASSED" : "FAILED"));
-
-            // Test 4: Die Rolling sequence validation
-            // Initial: Top 6, Front 4.
-            Die d = new Die(Player.Yellow, 6, 4);
-
-            // Roll Forward: 6 top, 4 front. Rolls over the back edge (3).
-            // Top becomes 3. Front becomes 6.
-            Die d3 = d.Tilted(0, -1);
-            bool step1 = d3.Top == 3;
-
-            // Roll Right: 3 top, 6 front.
-            // In a standard die: if 3 top, 6 front, then 5 is left and 2 is right.
-            // Rolls over right edge (2). Left side (5) becomes the new Top.
-            Die d5 = d3.Tilted(1, 0);
-            bool step2 = d5.Top == 5;
-
-            Console.WriteLine("Test 4d (6 -> 3 -> 5 sequence): " + (step1 && step2 ? "PASSED" : "FAILED") + " (Values: " + d3.Top + ", " + d5.Top + ")");
-
-            // Test 5: Win Conditions
-            RunWinConditionTests();
-
-            Console.WriteLine("Validation Complete.");
-        }
-
-        private static void RunWinConditionTests()
-        {
-            Board board = new Board();
-            for (int y = 0; y < 7; y++) for (int x = 0; x < 7; x++) board.Grid[x, y] = null;
-
-            int[] greenVals = { 5, 6, 5, 5, 1, 6, 1 };
-            for (int i = 0; i < 7; i++) board.Grid[i, 6] = new Die(Player.Green, greenVals[i], 1);
-
-            int[] yellowVals = { 2, 6, 6, 5, 5, 6 };
-            for (int i = 0; i < 6; i++) board.Grid[i, 0] = new Die(Player.Yellow, yellowVals[i], 1);
-
-            bool isOver = Rules.IsGameOver(board, out Player? winner);
-            Console.WriteLine("Test 5a (One reached 7, compare scores): " + (isOver && winner == Player.Yellow ? "PASSED" : "FAILED") + " (Winner: " + winner + ")");
-
-            int scoreForYellow = Rules.Evaluate(board, Player.Yellow);
-            int scoreForGreen = Rules.Evaluate(board, Player.Green);
-            Console.WriteLine("Test 5b (AI Evaluation handles score gap): " + (scoreForYellow > scoreForGreen ? "PASSED" : "FAILED"));
         }
     }
 }

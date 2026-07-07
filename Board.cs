@@ -1,3 +1,10 @@
+
+
+
+
+
+
+
 using System;
 
 namespace Dittle
@@ -10,8 +17,8 @@ namespace Dittle
         // 0: Top, 1: Bottom, 2: Front (Up screen), 3: Back (Down screen), 4: Left, 5: Right
         public int[] Faces;
 
-        public int Top => Faces != null ? Faces[0] : 0;
-        public int Front => Faces != null ? Faces[2] : 0;
+        public int Top => Faces[0];
+        public int Front => Faces[2];
 
         public Die(Player owner, int top, int front)
         {
@@ -22,6 +29,8 @@ namespace Dittle
             Faces[2] = front;
             Faces[3] = 7 - front;
 
+            // For a standard right-handed die:
+            // We need to determine the Right face (index 5)
             int right = 0;
             if (top == 6)
             {
@@ -46,6 +55,7 @@ namespace Dittle
             }
             else
             {
+                // Fallback for initial mapping if needed
                 right = CalculateRight(top, front);
             }
 
@@ -66,9 +76,7 @@ namespace Dittle
 
         public Die Tilted(int dx, int dy)
         {
-            if (Faces == null) return this;
-            int[] newFaces = new int[6];
-            Array.Copy(Faces, newFaces, 6);
+            int[] newFaces = (int[])Faces.Clone();
 
             if (dy == -1) // Tilt UP screen
             {
@@ -112,10 +120,14 @@ namespace Dittle
 
         public Board()
         {
+            // Yellow (Bottom): 4 is facing Center (UP screen / Front)
             for (int x = 0; x < Size; x++)
             {
                 Grid[x, 6] = new Die(Player.Yellow, 6, 4);
             }
+
+            // Green (Top): 4 is facing Center (DOWN screen / Back)
+            // If 4 is Back (idx 3), then Front (idx 2) is 3.
             for (int x = 0; x < Size; x++)
             {
                 Grid[x, 0] = new Die(Player.Green, 6, 3);

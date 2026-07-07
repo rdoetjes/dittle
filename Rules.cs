@@ -19,7 +19,7 @@ namespace Dittle
     {
         public static List<Move> GetAllLegalMoves(Board board, Player player)
         {
-            List<Move> moves = new List<Move>();
+            List<Move> moves = [];
             for (int y = 0; y < Board.Size; y++)
             {
                 for (int x = 0; x < Board.Size; x++)

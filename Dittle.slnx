@@ -1,4 +1,3 @@
 <Solution>
   <Project Path="dittle.csproj" />
-  <Project Path="Dittle.Tests/Dittle.Tests.csproj" />
 </Solution>

@@ -12,4 +12,11 @@
   <ItemGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
     <SourceRoot Include="/Users/rdoetjes/.nuget/packages/" />
   </ItemGroup>
+  <ImportGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
+    <Import Project="$(NuGetPackageRoot)xunit.runner.visualstudio/3.1.5/build/net8.0/xunit.runner.visualstudio.props" Condition="Exists('$(NuGetPackageRoot)xunit.runner.visualstudio/3.1.5/build/net8.0/xunit.runner.visualstudio.props')" />
+    <Import Project="$(NuGetPackageRoot)xunit.core/2.9.3/build/xunit.core.props" Condition="Exists('$(NuGetPackageRoot)xunit.core/2.9.3/build/xunit.core.props')" />
+  </ImportGroup>
+  <PropertyGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
+    <Pkgxunit_analyzers Condition=" '$(Pkgxunit_analyzers)' == '' ">/Users/rdoetjes/.nuget/packages/xunit.analyzers/1.18.0</Pkgxunit_analyzers>
+  </PropertyGroup>
 </Project>
