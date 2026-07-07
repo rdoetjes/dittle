@@ -1,0 +1,142 @@
+﻿using System;
+using System.Collections.Generic;
+using Raylib_cs;
+using System.Numerics;
+
+namespace Dittle
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            int playersCount = 1;
+            int aiDepth = 3;
+
+            for (int i = 0; i < args.Length; i++)
+            {
+                if (args[i] == "-players" && i + 1 < args.Length) playersCount = int.Parse(args[++i]);
+                if (args[i] == "-depth" && i + 1 < args.Length) aiDepth = int.Parse(args[++i]);
+            }
+
+            Raylib.InitWindow(800, 800, "Dittle");
+            Raylib.SetTargetFPS(60);
+
+            Board board = new Board();
+            Player currentPlayer = Player.Yellow;
+            int? selectedX = null, selectedY = null;
+            List<Move> legalMoves = new List<Move>();
+
+            while (!Raylib.WindowShouldClose())
+            {
+                // Logic
+                if (Rules.IsGameOver(board, out Player? winner))
+                {
+                    // End game display logic
+                }
+                else if (playersCount == 1 && currentPlayer == Player.Green)
+                {
+                    // AI Turn
+                    Move? best = AI.GetBestMove(board, Player.Green, aiDepth);
+                    if (best.HasValue)
+                    {
+                        AI.ApplyMove(board, best.Value);
+                    }
+                    currentPlayer = Player.Yellow;
+                }
+                else
+                {
+                    // Human Turn
+                    if (Raylib.IsMouseButtonPressed(MouseButton.Left))
+                    {
+                        Vector2 mouse = Raylib.GetMousePosition();
+                        int x = (int)(mouse.X / 100) - 1; // Offset for board center
+                        int y = (int)(mouse.Y / 100) - 1;
+
+                        if (board.IsInBounds(x, y))
+                        {
+                            if (selectedX == null)
+                            {
+                                if (board.Grid[x, y]?.Owner == currentPlayer)
+                                {
+                                    selectedX = x;
+                                    selectedY = y;
+                                    legalMoves = Rules.GetAllLegalMoves(board, currentPlayer);
+                                    legalMoves = legalMoves.FindAll(m => m.FromX == x && m.FromY == y);
+                                }
+                            }
+                            else
+                            {
+                                Move move = legalMoves.Find(m => m.ToX == x && m.ToY == y);
+                                if (move.ResultDie.Top != 0) // Valid move found
+                                {
+                                    AI.ApplyMove(board, move);
+                                    currentPlayer = (currentPlayer == Player.Yellow) ? Player.Green : Player.Yellow;
+                                    selectedX = null;
+                                    selectedY = null;
+                                    legalMoves.Clear();
+                                }
+                                else
+                                {
+                                    selectedX = null;
+                                    selectedY = null;
+                                    legalMoves.Clear();
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Draw
+                Raylib.BeginDrawing();
+                Raylib.ClearBackground(Color.DarkGray);
+
+                DrawBoard(board, selectedX, selectedY, legalMoves);
+
+                Raylib.DrawText($"Turn: {currentPlayer}", 10, 10, 20, Color.White);
+                if (Rules.IsGameOver(board, out Player? w))
+                {
+                    Raylib.DrawText($"WINNER: {w}", 300, 400, 40, Color.Red);
+                }
+
+                Raylib.EndDrawing();
+            }
+
+            Raylib.CloseWindow();
+        }
+
+        static void DrawBoard(Board board, int? selX, int? selY, List<Move> legalMoves)
+        {
+            int offset = 100;
+            int size = 80;
+
+            for (int y = 0; y < Board.Size; y++)
+            {
+                for (int x = 0; x < Board.Size; x++)
+                {
+                    int px = (x + 1) * offset;
+                    int py = (y + 1) * offset;
+
+                    Raylib.DrawRectangle(px, py, size, size, Color.Beige);
+                    Raylib.DrawRectangleLines(px, py, size, size, Color.Brown);
+
+                    if (selX == x && selY == y)
+                        Raylib.DrawRectangleLinesEx(new Rectangle(px, py, size, size), 3, Color.Blue);
+
+                    foreach (var m in legalMoves)
+                    {
+                        if (m.ToX == x && m.ToY == y)
+                            Raylib.DrawCircle(px + size / 2, py + size / 2, 5, Color.Blue);
+                    }
+
+                    Die? d = board.Grid[x, y];
+                    if (d.HasValue)
+                    {
+                        Color c = d.Value.Owner == Player.Yellow ? Color.Yellow : Color.Green;
+                        Raylib.DrawRectangle(px + 10, py + 10, size - 20, size - 20, c);
+                        Raylib.DrawText(d.Value.Top.ToString(), px + 30, py + 25, 30, Color.Black);
+                    }
+                }
+            }
+        }
+    }
+}

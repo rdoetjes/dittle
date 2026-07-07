@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "K+IzFoarkwQ=",
+  "success": true,
+  "projectFilePath": "/Users/rdoetjes/develop/dittle/dittle.csproj",
+  "expectedPackageFiles": [
+    "/Users/rdoetjes/.nuget/packages/raylib-cs/8.0.0/raylib-cs.8.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}
