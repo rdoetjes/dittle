@@ -15,3 +15,5 @@ sbom:
 
 clean:
 	rm -f $(SBOM)
+	rm -rf bin/
+	rm -rf obj/
