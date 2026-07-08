@@ -11,31 +11,36 @@ namespace Dittle
             List<Move> moves = Rules.GetAllLegalMoves(board, player);
             if (moves.Count == 0) return null;
 
-            object lockObj = new();
-            int bestVal = int.MinValue;
-            Move? bestMove = null;
+            // To introduce variety, we store evaluations of all moves
+            var moveEvaluations = new List<(Move move, int score)>();
+            object lockObj = new object();
 
-            // Parallelize the first level of the minimax search.
-            // Using Parallel.ForEach to distribute work across available cores.
             Parallel.ForEach(moves, move =>
             {
                 Board nextBoard = board.Clone();
                 ApplyMove(nextBoard, move);
 
-                // We start minimax with maximizing = false because we just made a move for 'player'
                 int val = Minimax(nextBoard, depth - 1, int.MinValue, int.MaxValue, false, player);
 
                 lock (lockObj)
                 {
-                    if (val > bestVal)
-                    {
-                        bestVal = val;
-                        bestMove = move;
-                    }
+                    moveEvaluations.Add((move, val));
                 }
             });
 
-            return bestMove;
+            if (moveEvaluations.Count == 0) return null;
+
+            // Find the best score
+            int bestVal = int.MinValue;
+            foreach (var item in moveEvaluations)
+                if (item.score > bestVal) bestVal = item.score;
+
+            // Collect all moves that share the best score
+            var bestMoves = moveEvaluations.FindAll(m => m.score == bestVal);
+
+            // Randomly select one of the best moves so the AI isn't deterministic
+            Random rng = new();
+            return bestMoves[rng.Next(bestMoves.Count)].move;
         }
 
         private static int Minimax(Board board, int depth, int alpha, int beta, bool maximizing, Player player)
