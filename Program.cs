@@ -189,7 +189,7 @@ namespace Dittle
             Raylib.DrawRectangleLinesEx(new Rectangle(BOARD_SIZE_X - 120, 10, 100, 30), 2, Color.DarkBrown);
             DrawTextCustom(" RESTART", BOARD_SIZE_X - 110, 18, 16, Color.DarkBrown);
 
-            DrawTextCustom("LEVEL:", 100, uiBottomY + 12, 18, Color.DarkBrown);
+            DrawTextCustom("LEVEL:", 100, uiBottomY + 12, 20, Color.DarkBrown);
             Raylib.DrawRectangle(210, uiBottomY, 40, 40, Color.LightGray);
             DrawTextCustom("-", 225, uiBottomY + 5, 30, Color.DarkBrown);
 
@@ -204,7 +204,7 @@ namespace Dittle
             DrawTextCustom("+", 321, uiBottomY + 5, 30, Color.Black);
 
 
-            DrawTextCustom($"TURN: {current}", 10, 10, 20, Color.DarkBrown);
+            DrawTextCustom($"TURN: {current.ToString().ToUpper()}", 10, 10, 20, Color.DarkBrown);
             if (Rules.IsGameOver(board, out Player? w))
             {
 
