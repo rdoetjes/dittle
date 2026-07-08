@@ -147,6 +147,7 @@ namespace Dittle
                     var allLegalMoves = Rules.GetAllLegalMoves(board, current);
                     var possibleMovesForDie = allLegalMoves.FindAll(m => m.FromX == x && m.FromY == y);
 
+                    // If valid move select that valid move based on current x and y click value.
                     if (possibleMovesForDie.Count > 0)
                     {
                         selX = x; selY = y;
