@@ -145,10 +145,10 @@ namespace Dittle
         private static void DrawUI(int depth, Player current, Board board)
         {
             int uiBottomY = BOARD_SIZE_Y - 80;
-            Raylib.DrawRectangleLinesEx(new(BOARD_SIZE_X - 120, 10, 100, 30), 2, Color.Black);
-            Raylib.DrawText("RESTART", BOARD_SIZE_X - 110, 18, 16, Color.Black);
+            Raylib.DrawRectangleLinesEx(new(BOARD_SIZE_X - 120, 10, 100, 30), 2, Color.White);
+            Raylib.DrawText("RESTART", BOARD_SIZE_X - 110, 18, 16, Color.White);
 
-            Raylib.DrawText("AI DEPTH:", 100, uiBottomY + 12, 18, Color.White);
+            Raylib.DrawText("LEVEL:", 100, uiBottomY + 12, 18, Color.White);
             Raylib.DrawRectangle(210, uiBottomY, 40, 40, Color.LightGray);
             Raylib.DrawText("-", 225, uiBottomY + 5, 30, Color.Black);
 
