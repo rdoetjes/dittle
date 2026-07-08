@@ -161,14 +161,38 @@ namespace Dittle
                 return true;
             }
 
-            // Only allow Level adjustments if game is NOT over
-            if (!Rules.IsGameOver(board, out _))
+            // Only allow Level adjustments if no moves have been made yet (Board is in initial state)
+            if (board.WhiteHorizontalMoves == 0 && board.BlackHorizontalMoves == 0 && IsInitialBoard(board))
             {
                 if (Raylib.CheckCollisionPointRec(m, new Rectangle(210, BOARD_SIZE_Y - 80, 40, 40)) && depth > 1) { depth--; return true; }
                 if (Raylib.CheckCollisionPointRec(m, new Rectangle(310, BOARD_SIZE_Y - 80, 40, 40)) && depth < MaxAiDepth) { depth++; return true; }
             }
 
             return false;
+        }
+
+        private static bool IsInitialBoard(Board board)
+        {
+            for (int y = 0; y < Board.Size; y++)
+            {
+                for (int x = 0; x < Board.Size; x++)
+                {
+                    Die? d = board.Grid[x, y];
+                    if (y == 0)
+                    {
+                        if (d == null || d.Value.Owner != Player.Black) return false;
+                    }
+                    else if (y == 6)
+                    {
+                        if (d == null || d.Value.Owner != Player.White) return false;
+                    }
+                    else
+                    {
+                        if (d != null) return false;
+                    }
+                }
+            }
+            return true;
         }
 
         private static void HandleBoardInput(Board board, ref Player currentPlayer, ref int? selX, ref int? selY, ref List<Move> moves)
