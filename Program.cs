@@ -12,6 +12,8 @@ namespace Dittle
         const int BOARD_SIZE_X = 500;
         const int BOARD_SIZE_Y = 600;
 
+        static Font customFont;
+
         public static void Main(string[] args)
         {
             int playersCount = 1;
@@ -25,6 +27,8 @@ namespace Dittle
 
             Raylib.InitWindow(BOARD_SIZE_X, BOARD_SIZE_Y, "Dittle");
             Raylib.SetTargetFPS(60);
+
+            customFont = Raylib.LoadFont("resources/fonts/Runiga.otf");
 
             Board board = new();
             Player currentPlayer = Player.White;
@@ -60,7 +64,13 @@ namespace Dittle
                 DrawAiMoveHighlight(lastAiMove, aiMoveTimer);
                 Raylib.EndDrawing();
             }
+            Raylib.UnloadFont(customFont);
             Raylib.CloseWindow();
+        }
+
+        private static void DrawTextCustom(string text, int x, int y, int fontSize, Color color)
+        {
+            Raylib.DrawTextEx(customFont, text, new(x, y), fontSize, 1, color);
         }
 
         private static void PerformAiTurn(Board board, int depth, ref Move? lastMove, ref float timer, ref Player current)
@@ -81,12 +91,12 @@ namespace Dittle
             Vector2 m = Raylib.GetMousePosition();
             if (Raylib.CheckCollisionPointRec(m, new Rectangle(BOARD_SIZE_X - 120, 10, 100, 30)))
             {
-                board = new(); current = Player.White;
+                board = new Board(); current = Player.White;
                 selX = null; selY = null; moves.Clear(); lastAi = null;
                 return true;
             }
-            if (Raylib.CheckCollisionPointRec(m, new(210, BOARD_SIZE_Y - 80, 40, 40)) && depth > 1) { depth--; return true; }
-            if (Raylib.CheckCollisionPointRec(m, new(310, BOARD_SIZE_Y - 80, 40, 40)) && depth < 6) { depth++; return true; }
+            if (Raylib.CheckCollisionPointRec(m, new Rectangle(210, BOARD_SIZE_Y - 80, 40, 40)) && depth > 1) { depth--; return true; }
+            if (Raylib.CheckCollisionPointRec(m, new Rectangle(310, BOARD_SIZE_Y - 80, 40, 40)) && depth < 6) { depth++; return true; }
             return false;
         }
 
@@ -124,47 +134,51 @@ namespace Dittle
         {
             int startX = (BOARD_SIZE_X - 7 * OFFSET) / 2, startY = (BOARD_SIZE_Y - 7 * OFFSET) / 2;
             int padding = (OFFSET - SIZE) / 2;
-            Color woodDark = new(101, 67, 33, 255), woodLight = new(193, 154, 107, 255);
+            Color woodDark = new Color(101, 67, 33, 255), woodLight = new Color(193, 154, 107, 255);
             for (int y = 0; y < Board.Size; y++)
                 for (int x = 0; x < Board.Size; x++)
                 {
                     int px = startX + x * OFFSET, py = startY + y * OFFSET;
                     Raylib.DrawRectangle(px, py, OFFSET, OFFSET, (x + y) % 2 == 0 ? woodLight : woodDark);
                     Raylib.DrawRectangleLines(px, py, OFFSET, OFFSET, Color.Black);
-                    if (selX == x && selY == y) Raylib.DrawRectangle(px, py, OFFSET, OFFSET, new(0, 121, 241, 100));
+                    if (selX == x && selY == y) Raylib.DrawRectangle(px, py, OFFSET, OFFSET, new Color(0, 121, 241, 100));
                     foreach (var m in legalMoves) if (m.ToX == x && m.ToY == y)
                     {
-                        Raylib.DrawCircle(px + OFFSET / 2, py + OFFSET / 2, OFFSET / 4, new(0, 121, 241, 200));
-                        Raylib.DrawText(m.ResultDie.Top.ToString(), px + OFFSET / 2 - 5, py + OFFSET / 2 - 8, 18, Color.White);
+                        Raylib.DrawCircle(px + OFFSET / 2, py + OFFSET / 2, OFFSET / 4, new Color(0, 121, 241, 200));
+                        DrawTextCustom(m.ResultDie.Top.ToString(), px + OFFSET / 2 - 5, py + OFFSET / 2 - 8, 18, Color.White);
                     }
+
                     Die? d = board.Grid[x, y];
-                    if (d is not null && d.HasValue) DrawDie(px + padding, py + padding, SIZE, d.Value);
+                    if (d is not null && d.HasValue)
+                    {
+                        DrawDie(px + padding, py + padding, SIZE, d.Value);
+                    }
                 }
         }
 
         private static void DrawUI(int depth, Player current, Board board)
         {
             int uiBottomY = BOARD_SIZE_Y - 80;
-            Raylib.DrawRectangleLinesEx(new(BOARD_SIZE_X - 120, 10, 100, 30), 2, Color.White);
-            Raylib.DrawText("RESTART", BOARD_SIZE_X - 110, 18, 16, Color.White);
+            Raylib.DrawRectangleLinesEx(new Rectangle(BOARD_SIZE_X - 120, 10, 100, 30), 2, Color.Black);
+            DrawTextCustom("RESTART", BOARD_SIZE_X - 110, 18, 16, Color.Black);
 
-            Raylib.DrawText("LEVEL:", 100, uiBottomY + 12, 18, Color.White);
+            DrawTextCustom("AI DEPTH:", 100, uiBottomY + 12, 18, Color.White);
             Raylib.DrawRectangle(210, uiBottomY, 40, 40, Color.LightGray);
-            Raylib.DrawText("-", 225, uiBottomY + 5, 30, Color.Black);
+            DrawTextCustom("-", 225, uiBottomY + 5, 30, Color.Black);
 
             string dText = depth.ToString();
-            int tw = Raylib.MeasureText(dText, 24);
-            Raylib.DrawText(dText, 250 + (60 - tw) / 2, uiBottomY + 10, 24, Color.Yellow);
+            Vector2 tw = Raylib.MeasureTextEx(customFont, dText, 24, 1);
+            DrawTextCustom(dText, 250 + (int)(60 - tw.X) / 2, uiBottomY + 10, 24, Color.Yellow);
 
             Raylib.DrawRectangle(310, uiBottomY, 40, 40, Color.LightGray);
-            Raylib.DrawText("+", 321, uiBottomY + 5, 30, Color.Black);
+            DrawTextCustom("+", 321, uiBottomY + 5, 30, Color.Black);
 
-            Raylib.DrawText($"Turn: {current}", 10, 10, 20, Color.White);
+            DrawTextCustom($"Turn: {current}", 10, 10, 20, Color.White);
             if (Rules.IsGameOver(board, out Player? w))
             {
                 string winnerText = $"WINNER: {w}";
-                int winnerTw = Raylib.MeasureText(winnerText, 30);
-                Raylib.DrawText(winnerText, (BOARD_SIZE_X - winnerTw) / 2, BOARD_SIZE_Y / 2, 30, Color.Red);
+                Vector2 winnerTw = Raylib.MeasureTextEx(customFont, winnerText, 30, 1);
+                DrawTextCustom(winnerText, (int)(BOARD_SIZE_X - winnerTw.X) / 2, BOARD_SIZE_Y / 2, 30, Color.Red);
             }
         }
 
@@ -174,9 +188,9 @@ namespace Dittle
             int startX = (BOARD_SIZE_X - 7 * OFFSET) / 2, startY = (BOARD_SIZE_Y - 7 * OFFSET) / 2;
             int fx = startX + lastMove.Value.FromX * OFFSET, fy = startY + lastMove.Value.FromY * OFFSET;
             int tx = startX + lastMove.Value.ToX * OFFSET, ty = startY + lastMove.Value.ToY * OFFSET;
-            Raylib.DrawRectangleLinesEx(new(fx, fy, OFFSET, OFFSET), 3, Color.Red);
-            Raylib.DrawLineEx(new(fx + OFFSET / 2, fy + OFFSET / 2), new(tx + OFFSET / 2, ty + OFFSET / 2), 3, Color.Red);
-            Raylib.DrawRectangleLinesEx(new(tx, ty, OFFSET, OFFSET), 4, Color.Orange);
+            Raylib.DrawRectangleLinesEx(new Rectangle(fx, fy, OFFSET, OFFSET), 3, Color.Red);
+            Raylib.DrawLineEx(new Vector2(fx + OFFSET / 2, fy + OFFSET / 2), new Vector2(tx + OFFSET / 2, ty + OFFSET / 2), 3, Color.Red);
+            Raylib.DrawRectangleLinesEx(new Rectangle(tx, ty, OFFSET, OFFSET), 4, Color.Orange);
         }
 
         static void DrawDie(int x, int y, int size, Die die)
