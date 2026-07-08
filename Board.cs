@@ -17,6 +17,7 @@ namespace Dittle
         // 0: Top, 1: Bottom, 2: Front (Up screen), 3: Back (Down screen), 4: Left, 5: Right
         public int[] Faces;
 
+
         public int Top => (Faces != null && Faces.Length > 0) ? Faces[0] : 0;
         public int Front => (Faces != null && Faces.Length > 2) ? Faces[2] : 0;
 
@@ -33,6 +34,7 @@ namespace Dittle
                 0, // filled below
                 0  // filled below
             ];
+
 
             int right = CalculateRightFace(top, front);
 
@@ -98,7 +100,9 @@ namespace Dittle
 
         public readonly Die Tilted(int dx, int dy)
         {
-            int[] newFaces = (int[])Faces.Clone();
+            if (Faces == null) return this;
+            int[] newFaces = new int[6];
+            Array.Copy(Faces, newFaces, 6);
 
             if (dy == -1) // Tilt UP screen
             {
