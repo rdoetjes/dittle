@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Dittle
 {
@@ -7,21 +8,33 @@ namespace Dittle
     {
         public static Move? GetBestMove(Board board, Player player, int depth)
         {
+            List<Move> moves = Rules.GetAllLegalMoves(board, player);
+            if (moves.Count == 0) return null;
+
+            object lockObj = new();
             int bestVal = int.MinValue;
             Move? bestMove = null;
-            List<Move> moves = Rules.GetAllLegalMoves(board, player);
 
-            foreach (var move in moves)
+            // Parallelize the first level of the minimax search.
+            // Using Parallel.ForEach to distribute work across available cores.
+            Parallel.ForEach(moves, move =>
             {
                 Board nextBoard = board.Clone();
                 ApplyMove(nextBoard, move);
+
+                // We start minimax with maximizing = false because we just made a move for 'player'
                 int val = Minimax(nextBoard, depth - 1, int.MinValue, int.MaxValue, false, player);
-                if (val > bestVal)
+
+                lock (lockObj)
                 {
-                    bestVal = val;
-                    bestMove = move;
+                    if (val > bestVal)
+                    {
+                        bestVal = val;
+                        bestMove = move;
+                    }
                 }
-            }
+            });
+
             return bestMove;
         }
 
