@@ -11,9 +11,23 @@ namespace Dittle
         const int SIZE = 50;
         const int BOARD_SIZE_X = 500;
         const int BOARD_SIZE_Y = 600;
-        const string DEFAULT_FONT = "resources/fonts/revvy.ttf";
 
         static Font customFont;
+        static Texture2D bgImg;
+
+        private static void LoadResources()
+        {
+            // Using assets found in resources
+            string fontPath = "resources/fonts/revvy.ttf";
+            if (System.IO.File.Exists(fontPath))
+            {
+                customFont = Raylib.LoadFontEx(fontPath, 64, null, 0);
+                Raylib.SetTextureFilter(customFont.Texture, TextureFilter.Bilinear);
+            }
+
+            string bgPath = "resources/img/bg.png";
+            if (System.IO.File.Exists(bgPath)) bgImg = Raylib.LoadTexture(bgPath);
+        }
 
         public static void Main(string[] args)
         {
@@ -26,29 +40,14 @@ namespace Dittle
                 if (args[i] == "-depth" && i + 1 < args.Length) aiDepth = int.Parse(args[++i]);
             }
 
-            // Ensure the window is initialized before loading assets
             Raylib.InitWindow(BOARD_SIZE_X, BOARD_SIZE_Y, "Dittle");
             Raylib.SetTargetFPS(60);
 
-            // Using full relative path explicitly
-            string fontPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, DEFAULT_FONT);
-            if (!System.IO.File.Exists(fontPath)) fontPath = DEFAULT_FONT;
-
-            customFont = Raylib.LoadFontEx(fontPath, 64, null, 0);
-
-            // Critical check: if font texture ID is 0, it failed to load
-            if (customFont.Texture.Id == 0)
-            {
-                Console.WriteLine("CRITICAL: Failed to load Runiga.otf, trying default fallback path...");
-            }
-
-            Raylib.SetTextureFilter(customFont.Texture, TextureFilter.Bilinear);
-
+            LoadResources();
             Board board = new();
             Player currentPlayer = Player.White;
             int? selectedX = null, selectedY = null;
-            List<Move> legalMoves = new();
-
+            List<Move> legalMoves = [];
             Move? lastAiMove = null;
             float aiMoveTimer = 0;
 
@@ -71,31 +70,33 @@ namespace Dittle
                     }
                 }
 
-                // 2. Rendering
                 Raylib.BeginDrawing();
                 Raylib.ClearBackground(Color.DarkGray);
 
-                // Use the font immediately after clearing to 'prime' the renderer
-                DrawTextCustom(" ", 0, 0, 10, Color.Blank);
+                if (bgImg.Id > 0)
+                {
+                    Raylib.DrawTexturePro(bgImg,
+                        new Rectangle(0, 0, bgImg.Width, bgImg.Height),
+                        new Rectangle(0, 0, BOARD_SIZE_X, BOARD_SIZE_Y),
+                        new Vector2(0, 0), 0, Color.White);
+                }
 
                 DrawBoard(board, selectedX, selectedY, legalMoves);
                 DrawUI(aiDepth, currentPlayer, board);
                 DrawAiMoveHighlight(lastAiMove, aiMoveTimer);
                 Raylib.EndDrawing();
             }
-            Raylib.UnloadFont(customFont);
+            if (customFont.Texture.Id > 0) Raylib.UnloadFont(customFont);
+            if (bgImg.Id > 0) Raylib.UnloadTexture(bgImg);
             Raylib.CloseWindow();
         }
 
         private static void DrawTextCustom(string text, int x, int y, int fontSize, Color color)
         {
-            // Explicitly force using the custom font by ensuring spacing is used
-            Raylib.DrawTextEx(customFont, text, new Vector2(x, y), (float)fontSize, 1.5f, color);
-        }
-
-        private static void DrawDefaultText(string text, int x, int y, int fontSize, Color color)
-        {
-            Raylib.DrawText(text, x, y, fontSize, color);
+            if (customFont.Texture.Id > 0)
+                Raylib.DrawTextEx(customFont, text, new Vector2(x, y), (float)fontSize, 1.5f, color);
+            else
+                Raylib.DrawText(text, x, y, fontSize, color);
         }
 
         private static void PerformAiTurn(Board board, int depth, ref Move? lastMove, ref float timer, ref Player current)
@@ -159,7 +160,7 @@ namespace Dittle
         {
             int startX = (BOARD_SIZE_X - 7 * OFFSET) / 2, startY = (BOARD_SIZE_Y - 7 * OFFSET) / 2;
             int padding = (OFFSET - SIZE) / 2;
-            Color woodDark = new Color(101, 67, 33, 255), woodLight = new Color(193, 154, 107, 255);
+            Color woodDark = new(101, 67, 33, 180), woodLight = new(193, 154, 107, 180);
             for (int y = 0; y < Board.Size; y++)
                 for (int x = 0; x < Board.Size; x++)
                 {
@@ -185,28 +186,35 @@ namespace Dittle
         private static void DrawUI(int depth, Player current, Board board)
         {
             int uiBottomY = BOARD_SIZE_Y - 80;
-            // Restart
-            Raylib.DrawRectangleLinesEx(new Rectangle(BOARD_SIZE_X - 120, 10, 100, 30), 2, Color.Black);
-            DrawTextCustom(" RESTART", BOARD_SIZE_X - 110, 18, 16, Color.Black);
+            Raylib.DrawRectangleLinesEx(new Rectangle(BOARD_SIZE_X - 120, 10, 100, 30), 2, Color.DarkBrown);
+            DrawTextCustom(" RESTART", BOARD_SIZE_X - 110, 18, 16, Color.DarkBrown);
 
-            DrawTextCustom("LEVEL:", 100, uiBottomY + 12, 18, Color.White);
+            DrawTextCustom("LEVEL:", 100, uiBottomY + 12, 18, Color.DarkBrown);
             Raylib.DrawRectangle(210, uiBottomY, 40, 40, Color.LightGray);
-            DrawTextCustom("-", 225, uiBottomY + 5, 30, Color.Black);
+            DrawTextCustom("-", 225, uiBottomY + 5, 30, Color.DarkBrown);
 
             string dText = depth.ToString();
-            Vector2 tw = Raylib.MeasureTextEx(customFont, dText, 24, 2);
-            DrawTextCustom(dText, 250 + (int)(60 - tw.X) / 2, uiBottomY + 10, 24, Color.Yellow);
+            int textW = 10;
+            if (customFont.Texture.Id > 0) textW = (int)Raylib.MeasureTextEx(customFont, dText, 24, 2).X;
+            else textW = Raylib.MeasureText(dText, 24);
+
+            DrawTextCustom(dText, 250 + (60 - textW) / 2, uiBottomY + 10, 24, Color.Yellow);
 
             Raylib.DrawRectangle(310, uiBottomY, 40, 40, Color.LightGray);
             DrawTextCustom("+", 321, uiBottomY + 5, 30, Color.Black);
 
-            DrawTextCustom($"Turn: {current}", 10, 10, 20, Color.White);
+
+            DrawTextCustom($"TURN: {current}", 10, 10, 20, Color.DarkBrown);
             if (Rules.IsGameOver(board, out Player? w))
             {
+
                 string winnerText = $"WINNER: {w}";
-                Vector2 winnerTw = Raylib.MeasureTextEx(customFont, winnerText, 40, 2);
-                Raylib.DrawRectangle(0, BOARD_SIZE_Y / 2 - 20, BOARD_SIZE_X, 80, new Color(0, 0, 0, 200));
-                DrawTextCustom(winnerText, (int)(BOARD_SIZE_X - winnerTw.X) / 2, BOARD_SIZE_Y / 2, 40, Color.Gold);
+                int winW = 100;
+                if (customFont.Texture.Id > 0) winW = (int)Raylib.MeasureTextEx(customFont, winnerText, 40, 2).X;
+                else winW = Raylib.MeasureText(winnerText, 40);
+
+                Raylib.DrawRectangle(0, BOARD_SIZE_Y / 2 - 20, BOARD_SIZE_X, 80, new(0, 0, 0, 200));
+                DrawTextCustom(winnerText, (BOARD_SIZE_X - winW) / 2, BOARD_SIZE_Y / 2, 40, Color.Gold);
             }
         }
 
@@ -217,7 +225,7 @@ namespace Dittle
             int fx = startX + lastMove.Value.FromX * OFFSET, fy = startY + lastMove.Value.FromY * OFFSET;
             int tx = startX + lastMove.Value.ToX * OFFSET, ty = startY + lastMove.Value.ToY * OFFSET;
             Raylib.DrawRectangleLinesEx(new Rectangle(fx, fy, OFFSET, OFFSET), 3, Color.Red);
-            Raylib.DrawLineEx(new Vector2(fx + OFFSET / 2, fy + OFFSET / 2), new Vector2(tx + OFFSET / 2, ty + OFFSET / 2), 3, Color.Red);
+            Raylib.DrawLineEx(new(fx + OFFSET / 2, fy + OFFSET / 2), new(tx + OFFSET / 2, ty + OFFSET / 2), 3, Color.Red);
             Raylib.DrawRectangleLinesEx(new Rectangle(tx, ty, OFFSET, OFFSET), 4, Color.Orange);
         }
 
