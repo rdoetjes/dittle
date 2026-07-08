@@ -11,6 +11,8 @@ namespace Dittle
         const int SIZE = 50;
         const int BOARD_SIZE_X = 500;
         const int BOARD_SIZE_Y = 600;
+        public const int DefaultAiDepth = 6;
+        public const int MaxAiDepth = 6;
 
         static Font customFont;
         static Texture2D bgImg;
@@ -43,7 +45,7 @@ namespace Dittle
         public static void Main(string[] args)
         {
             int playersCount = 1;
-            int aiDepth = 4;
+            int aiDepth = DefaultAiDepth;
 
             for (int i = 0; i < args.Length; i++)
             {
@@ -124,7 +126,7 @@ namespace Dittle
                 return true;
             }
             if (Raylib.CheckCollisionPointRec(m, new Rectangle(210, BOARD_SIZE_Y - 80, 40, 40)) && depth > 1) { depth--; return true; }
-            if (Raylib.CheckCollisionPointRec(m, new Rectangle(310, BOARD_SIZE_Y - 80, 40, 40)) && depth < 6) { depth++; return true; }
+            if (Raylib.CheckCollisionPointRec(m, new Rectangle(310, BOARD_SIZE_Y - 80, 40, 40)) && depth < MaxAiDepth) { depth++; return true; }
             return false;
         }
 
