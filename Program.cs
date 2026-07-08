@@ -86,8 +86,7 @@ namespace Dittle
                 Raylib.BeginDrawing();
                 Raylib.ClearBackground(Color.DarkGray);
                 DrawBoard(board, selectedX, selectedY, legalMoves);
-                DrawHorizontalMoves(Player.White, (uint)board.WhiteHorizontalMoves);
-                DrawHorizontalMoves(Player.Black, (uint)board.BlackHorizontalMoves);
+
                 DrawUI(aiDepth, currentPlayer, board);
                 DrawAiMoveHighlight(lastAiMove, aiMoveTimer);
                 Raylib.EndDrawing();
@@ -271,6 +270,10 @@ namespace Dittle
                 Raylib.DrawRectangle(0, BOARD_SIZE_Y / 2 - 20, BOARD_SIZE_X, 80, new(0, 0, 0, 200));
                 DrawTextCustom(winnerText, (BOARD_SIZE_X - winW) / 2, BOARD_SIZE_Y / 2, 40, Color.Gold);
             }
+
+            // The number of horizontal move indicators
+            DrawHorizontalMoves(Player.White, (uint)board.WhiteHorizontalMoves);
+            DrawHorizontalMoves(Player.Black, (uint)board.BlackHorizontalMoves);
         }
 
         private static void DrawAiMoveHighlight(Move? lastMove, float timer)
