@@ -47,7 +47,7 @@ namespace Dittle
             if (boardImg.Id > 0) Raylib.UnloadTexture(boardImg);
         }
 
-        public static void Main(string[] args)
+        private static void InitializeResourcePath()
         {
             // MacOS App Bundle resource path handling
             if (OperatingSystem.IsMacOS() && (AppContext.BaseDirectory.Contains(".app/Contents/MacOS") || AppContext.BaseDirectory.Contains(".app/Contents/Resources")))
@@ -70,6 +70,11 @@ namespace Dittle
                     System.IO.Directory.SetCurrentDirectory(resourcePath);
                 }
             }
+        }
+
+        public static void Main(string[] args)
+        {
+            InitializeResourcePath();
 
             int playersCount = 1;
             int aiDepth = DefaultAiDepth;
