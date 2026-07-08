@@ -1,7 +1,7 @@
 APP=dittle
 SBOM=$(APP)-sbom.json
 
-.PHONY: sbom scan clean
+.PHONY: sbom scan clean dist
 
 release:
 	dotnet publish -c Release -r win-x64 --self-contained true
@@ -13,7 +13,5 @@ sbom:
 	syft . -o cyclonedx-json=$(SBOM)
 	grype sbom:$(SBOM)
 
-clean:
-	rm -f $(SBOM)
-	rm -rf bin/
-	rm -rf obj/
+dist:
+	bash package.sh

@@ -22,6 +22,9 @@ namespace Dittle
         {
             // Using assets found in resources
             string fontPath = "resources/fonts/revvy.ttf";
+            // Fallback for MacOS App Bundle where working directory is Resources/
+            if (!System.IO.File.Exists(fontPath) && System.IO.File.Exists("fonts/revvy.ttf")) fontPath = "fonts/revvy.ttf";
+            
             if (System.IO.File.Exists(fontPath))
             {
                 customFont = Raylib.LoadFontEx(fontPath, 64, null, 0);
@@ -29,9 +32,11 @@ namespace Dittle
             }
 
             string bgPath = "resources/img/bg.png";
+            if (!System.IO.File.Exists(bgPath) && System.IO.File.Exists("img/bg.png")) bgPath = "img/bg.png";
             if (System.IO.File.Exists(bgPath)) bgImg = Raylib.LoadTexture(bgPath);
 
             string boardPath = "resources/img/board.png";
+            if (!System.IO.File.Exists(boardPath) && System.IO.File.Exists("img/board.png")) boardPath = "img/board.png";
             if (System.IO.File.Exists(boardPath)) boardImg = Raylib.LoadTexture(boardPath);
         }
 
@@ -44,6 +49,28 @@ namespace Dittle
 
         public static void Main(string[] args)
         {
+            // MacOS App Bundle resource path handling
+            if (OperatingSystem.IsMacOS() && (AppContext.BaseDirectory.Contains(".app/Contents/MacOS") || AppContext.BaseDirectory.Contains(".app/Contents/Resources")))
+            {
+                // Try to find Resources folder relative to the binary
+                string baseDir = AppContext.BaseDirectory;
+                string? resourcePath = null;
+
+                if (baseDir.Contains(".app/Contents/MacOS"))
+                {
+                    resourcePath = System.IO.Path.GetFullPath(System.IO.Path.Combine(baseDir, "..", "Resources"));
+                }
+                else if (baseDir.Contains(".app/Contents/Resources"))
+                {
+                    resourcePath = baseDir;
+                }
+
+                if (resourcePath != null && System.IO.Directory.Exists(resourcePath))
+                {
+                    System.IO.Directory.SetCurrentDirectory(resourcePath);
+                }
+            }
+
             int playersCount = 1;
             int aiDepth = DefaultAiDepth;
 
