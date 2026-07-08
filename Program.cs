@@ -11,6 +11,7 @@ namespace Dittle
         const int SIZE = 50;
         const int BOARD_SIZE_X = 500;
         const int BOARD_SIZE_Y = 600;
+        const string DEFAULT_FONT = "resources/fonts/revvy.ttf";
 
         static Font customFont;
 
@@ -25,15 +26,28 @@ namespace Dittle
                 if (args[i] == "-depth" && i + 1 < args.Length) aiDepth = int.Parse(args[++i]);
             }
 
+            // Ensure the window is initialized before loading assets
             Raylib.InitWindow(BOARD_SIZE_X, BOARD_SIZE_Y, "Dittle");
             Raylib.SetTargetFPS(60);
 
-            customFont = Raylib.LoadFont("resources/fonts/Runiga.otf");
+            // Using full relative path explicitly
+            string fontPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, DEFAULT_FONT);
+            if (!System.IO.File.Exists(fontPath)) fontPath = DEFAULT_FONT;
+
+            customFont = Raylib.LoadFontEx(fontPath, 64, null, 0);
+
+            // Critical check: if font texture ID is 0, it failed to load
+            if (customFont.Texture.Id == 0)
+            {
+                Console.WriteLine("CRITICAL: Failed to load Runiga.otf, trying default fallback path...");
+            }
+
+            Raylib.SetTextureFilter(customFont.Texture, TextureFilter.Bilinear);
 
             Board board = new();
             Player currentPlayer = Player.White;
             int? selectedX = null, selectedY = null;
-            List<Move> legalMoves = [];
+            List<Move> legalMoves = new();
 
             Move? lastAiMove = null;
             float aiMoveTimer = 0;
@@ -57,8 +71,13 @@ namespace Dittle
                     }
                 }
 
+                // 2. Rendering
                 Raylib.BeginDrawing();
                 Raylib.ClearBackground(Color.DarkGray);
+
+                // Use the font immediately after clearing to 'prime' the renderer
+                DrawTextCustom(" ", 0, 0, 10, Color.Blank);
+
                 DrawBoard(board, selectedX, selectedY, legalMoves);
                 DrawUI(aiDepth, currentPlayer, board);
                 DrawAiMoveHighlight(lastAiMove, aiMoveTimer);
@@ -70,7 +89,13 @@ namespace Dittle
 
         private static void DrawTextCustom(string text, int x, int y, int fontSize, Color color)
         {
-            Raylib.DrawTextEx(customFont, text, new(x, y), fontSize, 1, color);
+            // Explicitly force using the custom font by ensuring spacing is used
+            Raylib.DrawTextEx(customFont, text, new Vector2(x, y), (float)fontSize, 1.5f, color);
+        }
+
+        private static void DrawDefaultText(string text, int x, int y, int fontSize, Color color)
+        {
+            Raylib.DrawText(text, x, y, fontSize, color);
         }
 
         private static void PerformAiTurn(Board board, int depth, ref Move? lastMove, ref float timer, ref Player current)
@@ -142,32 +167,34 @@ namespace Dittle
                     Raylib.DrawRectangle(px, py, OFFSET, OFFSET, (x + y) % 2 == 0 ? woodLight : woodDark);
                     Raylib.DrawRectangleLines(px, py, OFFSET, OFFSET, Color.Black);
                     if (selX == x && selY == y) Raylib.DrawRectangle(px, py, OFFSET, OFFSET, new Color(0, 121, 241, 100));
-                    foreach (var m in legalMoves) if (m.ToX == x && m.ToY == y)
+
+                    foreach (var m in legalMoves)
                     {
-                        Raylib.DrawCircle(px + OFFSET / 2, py + OFFSET / 2, OFFSET / 4, new Color(0, 121, 241, 200));
-                        DrawTextCustom(m.ResultDie.Top.ToString(), px + OFFSET / 2 - 5, py + OFFSET / 2 - 8, 18, Color.White);
+                        if (m.ToX == x && m.ToY == y)
+                        {
+                            Raylib.DrawCircle(px + OFFSET / 2, py + OFFSET / 2, OFFSET / 4, new Color(0, 121, 241, 200));
+                            DrawTextCustom(m.ResultDie.Top.ToString(), px + OFFSET / 2 - 5, py + OFFSET / 2 - 8, 18, Color.White);
+                        }
                     }
 
                     Die? d = board.Grid[x, y];
-                    if (d is not null && d.HasValue)
-                    {
-                        DrawDie(px + padding, py + padding, SIZE, d.Value);
-                    }
+                    if (d is not null && d.HasValue) DrawDie(px + padding, py + padding, SIZE, d.Value);
                 }
         }
 
         private static void DrawUI(int depth, Player current, Board board)
         {
             int uiBottomY = BOARD_SIZE_Y - 80;
+            // Restart
             Raylib.DrawRectangleLinesEx(new Rectangle(BOARD_SIZE_X - 120, 10, 100, 30), 2, Color.Black);
-            DrawTextCustom("RESTART", BOARD_SIZE_X - 110, 18, 16, Color.Black);
+            DrawTextCustom(" RESTART", BOARD_SIZE_X - 110, 18, 16, Color.Black);
 
-            DrawTextCustom("AI DEPTH:", 100, uiBottomY + 12, 18, Color.White);
+            DrawTextCustom("LEVEL:", 100, uiBottomY + 12, 18, Color.White);
             Raylib.DrawRectangle(210, uiBottomY, 40, 40, Color.LightGray);
             DrawTextCustom("-", 225, uiBottomY + 5, 30, Color.Black);
 
             string dText = depth.ToString();
-            Vector2 tw = Raylib.MeasureTextEx(customFont, dText, 24, 1);
+            Vector2 tw = Raylib.MeasureTextEx(customFont, dText, 24, 2);
             DrawTextCustom(dText, 250 + (int)(60 - tw.X) / 2, uiBottomY + 10, 24, Color.Yellow);
 
             Raylib.DrawRectangle(310, uiBottomY, 40, 40, Color.LightGray);
@@ -177,8 +204,9 @@ namespace Dittle
             if (Rules.IsGameOver(board, out Player? w))
             {
                 string winnerText = $"WINNER: {w}";
-                Vector2 winnerTw = Raylib.MeasureTextEx(customFont, winnerText, 30, 1);
-                DrawTextCustom(winnerText, (int)(BOARD_SIZE_X - winnerTw.X) / 2, BOARD_SIZE_Y / 2, 30, Color.Red);
+                Vector2 winnerTw = Raylib.MeasureTextEx(customFont, winnerText, 40, 2);
+                Raylib.DrawRectangle(0, BOARD_SIZE_Y / 2 - 20, BOARD_SIZE_X, 80, new Color(0, 0, 0, 200));
+                DrawTextCustom(winnerText, (int)(BOARD_SIZE_X - winnerTw.X) / 2, BOARD_SIZE_Y / 2, 40, Color.Gold);
             }
         }
 
