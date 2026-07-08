@@ -171,10 +171,6 @@ namespace Dittle
                 for (int x = 0; x < Board.Size; x++)
                 {
                     int px = startX + x * OFFSET, py = startY + y * OFFSET;
-                    // Raylib.DrawRectangle(px, py, OFFSET, OFFSET, (x + y) % 2 == 0 ? woodLight : woodDark);
-                    // Raylib.DrawRectangleLines(px, py, OFFSET, OFFSET, Color.Black);
-                    // if (selX == x && selY == y) Raylib.DrawRectangle(px, py, OFFSET, OFFSET, new Color(0, 121, 241, 100));
-
                     foreach (var m in legalMoves)
                     {
                         if (m.ToX == x && m.ToY == y)
