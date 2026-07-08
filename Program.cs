@@ -33,6 +33,13 @@ namespace Dittle
             if (System.IO.File.Exists(boardPath)) boardImg = Raylib.LoadTexture(boardPath);
         }
 
+        private static void UnloadResources()
+        {
+            if (customFont.Texture.Id > 0) Raylib.UnloadFont(customFont);
+            if (bgImg.Id > 0) Raylib.UnloadTexture(bgImg);
+            if (boardImg.Id > 0) Raylib.UnloadTexture(boardImg);
+        }
+
         public static void Main(string[] args)
         {
             int playersCount = 1;
@@ -90,8 +97,8 @@ namespace Dittle
                 DrawAiMoveHighlight(lastAiMove, aiMoveTimer);
                 Raylib.EndDrawing();
             }
-            if (customFont.Texture.Id > 0) Raylib.UnloadFont(customFont);
-            if (bgImg.Id > 0) Raylib.UnloadTexture(bgImg);
+
+            UnloadResources();
             Raylib.CloseWindow();
         }
 
