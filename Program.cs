@@ -227,14 +227,15 @@ namespace Dittle
                     // Draw outer glow/body
                     Raylib.DrawCircle(cx, cy, (float)radius, glowColor);
                     // Draw white hot spot
-                    Raylib.DrawCircle(cx - 2, cy - 2, (float)radius / 2, new Color(255, 255, 255, 200));
+                    Raylib.DrawCircle(cx - 2, cy - 2, (float)radius / 2, new(255, 255, 255, 200));
                     // Outline
                     Raylib.DrawCircleLines(cx, cy, (float)radius, Color.DarkGreen);
                 }
                 else
                 {
                     // LED OFF - Just outline
-                    Raylib.DrawCircleLines(cx, cy, (float)radius, Color.DarkGreen);
+                    Raylib.DrawCircle(cx, cy, (float)radius, Color.DarkGreen);
+                    Raylib.DrawCircle(cx - 2, cy - 2, (float)radius / 2, new(128, 128, 128, 200));
                 }
             }
         }
