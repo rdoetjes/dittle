@@ -10,8 +10,14 @@ Movement is restricted to forward or sideways (no backward or diagonal moves).
 
 * Tilt: Roll a die one square. The upward-facing number changes physically.
 * Jump: Leap over one or more dice in a straight line.
-* Requirement: You must be immediately adjacent to a die to jump it.
-* Requirement: There must be at least one empty space between each die being jumped.
+* * Requirement: You must be immediately adjacent to a die to jump it.
+* * Requirement: There must be at least one empty space between each die being jumped.
 * Tilt + Jump: Tilt the die once, then perform a jump (Straight or L-shaped). The upward number remains constant during the jump phase.
 * Forced foreward move: After 4 consecutive horizontal moves, you are forced to move forwards, unless not possible.
 
+## Game end
+The game ends when a player manages to move all their dice to the other side of the board
+
+## Winner
+The total of the dice on the opposite side are added up, the one with the highest score wins
+In case of tie in score, then the person who managed to get all the dice across wins
