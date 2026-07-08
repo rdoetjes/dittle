@@ -230,7 +230,11 @@ namespace Dittle
                 // Winner is the one with the higher score in their respective goal row
                 if (yellowScore > greenScore) winner = Player.White;
                 else if (greenScore > yellowScore) winner = Player.Black;
-                else winner = null; // Draw (possible in rules?)
+                else
+                {
+                    // Draw-breaker: the player who reached the goal row with all 7 dice wins
+                    winner = (yellowInBase == 7) ? Player.White : Player.Black;
+                }
                 return true;
             }
             return false;
