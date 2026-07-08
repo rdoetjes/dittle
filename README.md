@@ -19,6 +19,7 @@ Movement is restricted to **forward** or **sideways** (no backward or diagonal m
     - **Requirement**: You must be immediately adjacent to a die to jump it.
     - **Requirement**: There must be at least one empty space between each die being jumped.
 - **Tilt + Jump**: Tilt the die once, then perform a jump (Straight or L-shaped). The upward number remains constant during the jump phase.
+- **Forced foreward move**: After 4 consecutive horizontal moves, you are forced to move forwards, unless not possible.
 
 ### Winning
 The game ends immediately when one player has **all seven dice** in the opponent’s base row.
