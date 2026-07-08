@@ -130,7 +130,7 @@ namespace Dittle
             return false;
         }
 
-        private static void HandleBoardInput(Board board, ref Player current, ref int? selX, ref int? selY, ref List<Move> moves)
+        private static void HandleBoardInput(Board board, ref Player currentPlayer, ref int? selX, ref int? selY, ref List<Move> moves)
         {
             if (!Raylib.IsMouseButtonPressed(MouseButton.Left)) return;
             Vector2 mouse = Raylib.GetMousePosition();
@@ -142,9 +142,9 @@ namespace Dittle
 
             if (selX == null)
             {
-                if (board.Grid[x, y]?.Owner == current)
+                if (board.Grid[x, y]?.Owner == currentPlayer)
                 {
-                    var allLegalMoves = Rules.GetAllLegalMoves(board, current);
+                    var allLegalMoves = Rules.GetAllLegalMoves(board, currentPlayer);
                     var possibleMovesForDie = allLegalMoves.FindAll(m => m.FromX == x && m.FromY == y);
 
                     // If valid move select that valid move based on current x and y click value.
@@ -163,7 +163,7 @@ namespace Dittle
                 if (move.FromX == selX && move.FromY == selY)
                 {
                     AI.ApplyMove(board, move);
-                    current = (current == Player.White) ? Player.Black : Player.White;
+                    currentPlayer = (currentPlayer == Player.White) ? Player.Black : Player.White;
                 }
                 selX = null; selY = null; moves.Clear();
             }
