@@ -86,6 +86,8 @@ namespace Dittle
                 Raylib.BeginDrawing();
                 Raylib.ClearBackground(Color.DarkGray);
                 DrawBoard(board, selectedX, selectedY, legalMoves);
+                DrawHorizontalMoves(Player.White, (uint)board.WhiteHorizontalMoves);
+                DrawHorizontalMoves(Player.Black, (uint)board.BlackHorizontalMoves);
                 DrawUI(aiDepth, currentPlayer, board);
                 DrawAiMoveHighlight(lastAiMove, aiMoveTimer);
                 Raylib.EndDrawing();
@@ -200,13 +202,51 @@ namespace Dittle
                 }
         }
 
+        private static void DrawHorizontalMoves(Player player, uint nrHorizontalMoves)
+        {
+            int startX = (BOARD_SIZE_X - 7 * OFFSET) / 2;
+            int boardHeight = 7 * OFFSET;
+            int startY = (BOARD_SIZE_Y - boardHeight) / 2;
+
+            // Position indicators
+            int xPos = startX;
+            int yPos = (player == Player.White) ? startY + boardHeight + 10 : startY - 25;
+
+            int radius = 8;
+            int spacing = 22;
+
+            for (int i = 0; i < 4; i++)
+            {
+                int cx = xPos + i * spacing + radius;
+                int cy = yPos + radius;
+
+                if (i < nrHorizontalMoves)
+                {
+                    // LED ON - Green "on" state
+                    Color glowColor = new(0, 228, 48, 255); // Raylib Lime/Green
+
+                    // Draw outer glow/body
+                    Raylib.DrawCircle(cx, cy, (float)radius, glowColor);
+                    // Draw white hot spot
+                    Raylib.DrawCircle(cx - 2, cy - 2, (float)radius / 2, new Color(255, 255, 255, 200));
+                    // Outline
+                    Raylib.DrawCircleLines(cx, cy, (float)radius, Color.DarkGreen);
+                }
+                else
+                {
+                    // LED OFF - Just outline
+                    Raylib.DrawCircleLines(cx, cy, (float)radius, Color.DarkGreen);
+                }
+            }
+        }
+
         private static void DrawUI(int depth, Player current, Board board)
         {
             int uiBottomY = BOARD_SIZE_Y - 80;
             Raylib.DrawRectangleLinesEx(new Rectangle(BOARD_SIZE_X - 120, 10, 100, 30), 2, Color.DarkBrown);
             DrawTextCustom(" RESTART", BOARD_SIZE_X - 110, 18, 16, Color.DarkBrown);
 
-            DrawTextCustom("LEVEL:", 100, uiBottomY + 12, 20, Color.DarkBrown);
+            DrawTextCustom("LEVEL:", 100, uiBottomY + 14, 20, Color.DarkBrown);
             Raylib.DrawRectangle(210, uiBottomY, 40, 40, Color.Beige);
             DrawTextCustom("-", 225, uiBottomY + 5, 30, Color.Black);
 
