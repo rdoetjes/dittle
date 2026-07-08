@@ -190,24 +190,22 @@ namespace Dittle
             DrawTextCustom(" RESTART", BOARD_SIZE_X - 110, 18, 16, Color.DarkBrown);
 
             DrawTextCustom("LEVEL:", 100, uiBottomY + 12, 20, Color.DarkBrown);
-            Raylib.DrawRectangle(210, uiBottomY, 40, 40, Color.LightGray);
-            DrawTextCustom("-", 225, uiBottomY + 5, 30, Color.DarkBrown);
+            Raylib.DrawRectangle(210, uiBottomY, 40, 40, Color.Beige);
+            DrawTextCustom("-", 225, uiBottomY + 5, 30, Color.Black);
+
+            Raylib.DrawRectangle(310, uiBottomY, 40, 40, Color.Beige);
+            DrawTextCustom("+", 321, uiBottomY + 5, 30, Color.Black);
 
             string dText = depth.ToString();
             int textW = 10;
             if (customFont.Texture.Id > 0) textW = (int)Raylib.MeasureTextEx(customFont, dText, 24, 2).X;
             else textW = Raylib.MeasureText(dText, 24);
 
-            DrawTextCustom(dText, 250 + (60 - textW) / 2, uiBottomY + 10, 24, Color.Yellow);
-
-            Raylib.DrawRectangle(310, uiBottomY, 40, 40, Color.LightGray);
-            DrawTextCustom("+", 321, uiBottomY + 5, 30, Color.Black);
-
+            DrawTextCustom(dText, 250 + (60 - textW) / 2, uiBottomY + 10, 25, Color.DarkBrown);
 
             DrawTextCustom($"TURN: {current.ToString().ToUpper()}", 10, 10, 20, Color.DarkBrown);
             if (Rules.IsGameOver(board, out Player? w))
             {
-
                 string winnerText = $"WINNER: {w}";
                 int winW = 100;
                 if (customFont.Texture.Id > 0) winW = (int)Raylib.MeasureTextEx(customFont, winnerText, 40, 2).X;
