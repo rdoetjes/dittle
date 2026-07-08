@@ -31,11 +31,7 @@ namespace Dittle
             if (moveEvaluations.Count == 0) return null;
 
             // Find the best score
-            int bestVal = int.MinValue;
-            foreach (var item in moveEvaluations)
-            {
-                if (item.score > bestVal) bestVal = item.score;
-            }
+            int bestVal = moveEvaluations.Max(item => item.score);
 
             // Collect all moves that share the best score
             var bestMoves = moveEvaluations.FindAll(m => m.score == bestVal);
