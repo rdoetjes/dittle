@@ -83,15 +83,6 @@ namespace Dittle
 
                 Raylib.BeginDrawing();
                 Raylib.ClearBackground(Color.DarkGray);
-
-                if (bgImg.Id > 0)
-                {
-                    Raylib.DrawTexturePro(bgImg,
-                        new Rectangle(0, 0, bgImg.Width, bgImg.Height),
-                        new Rectangle(0, 0, BOARD_SIZE_X, BOARD_SIZE_Y),
-                        new Vector2(0, 0), 0, Color.White);
-                }
-
                 DrawBoard(board, selectedX, selectedY, legalMoves);
                 DrawUI(aiDepth, currentPlayer, board);
                 DrawAiMoveHighlight(lastAiMove, aiMoveTimer);
@@ -171,8 +162,14 @@ namespace Dittle
         {
             int startX = (BOARD_SIZE_X - 7 * OFFSET) / 2, startY = (BOARD_SIZE_Y - 7 * OFFSET) / 2;
             int padding = (OFFSET - SIZE) / 2;
-            Color woodDark = new(101, 67, 33, 180), woodLight = new(193, 154, 107, 180);
 
+            //Sand bankground
+            Raylib.DrawTexturePro(bgImg,
+                    new(0, 0, bgImg.Width, bgImg.Height),
+                    new(0, 0, BOARD_SIZE_X, BOARD_SIZE_Y),
+                    new(0, 0), 0, Color.White);
+
+            //Board background
             Raylib.DrawTextureEx(boardImg, new(startX, startY), 0.0f, 0.5f, Color.Beige);
             for (int y = 0; y < Board.Size; y++)
                 for (int x = 0; x < Board.Size; x++)
