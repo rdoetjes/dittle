@@ -4,7 +4,10 @@ SBOM=$(APP)-sbom.json
 .PHONY: sbom scan clean
 
 release:
-	dotnet build -c Release
+	dotnet publish -c Release -r win-x64 --self-contained true
+	dotnet publish -c Release -r osx-arm64 --self-contained true
+	dotnet publish -c Release -r osx-x64 --self-contained true
+	dotnet publish -r linux-x64 --self-contained true
 
 sbom:
 	syft . -o cyclonedx-json=$(SBOM)
