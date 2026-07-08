@@ -144,8 +144,16 @@ namespace Dittle
             {
                 if (board.Grid[x, y]?.Owner == current)
                 {
-                    selX = x; selY = y;
-                    moves = Rules.GetAllLegalMoves(board, current).FindAll(m => m.FromX == x && m.FromY == y);
+                    var allLegalMoves = Rules.GetAllLegalMoves(board, current);
+                    var possibleMovesForDie = allLegalMoves.FindAll(m => m.FromX == x && m.FromY == y);
+
+                    if (possibleMovesForDie.Count > 0)
+                    {
+                        selX = x; selY = y;
+                        moves = possibleMovesForDie;
+                    }
+                    // If no moves for this die, we don't select it,
+                    // allowing the user to click another die immediately.
                 }
             }
             else
