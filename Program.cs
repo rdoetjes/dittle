@@ -14,6 +14,7 @@ namespace Dittle
 
         static Font customFont;
         static Texture2D bgImg;
+        static Texture2D boardImg;
 
         private static void LoadResources()
         {
@@ -27,6 +28,9 @@ namespace Dittle
 
             string bgPath = "resources/img/bg.png";
             if (System.IO.File.Exists(bgPath)) bgImg = Raylib.LoadTexture(bgPath);
+
+            string boardPath = "resources/img/board.png";
+            if (System.IO.File.Exists(boardPath)) boardImg = Raylib.LoadTexture(boardPath);
         }
 
         public static void Main(string[] args)
@@ -161,13 +165,15 @@ namespace Dittle
             int startX = (BOARD_SIZE_X - 7 * OFFSET) / 2, startY = (BOARD_SIZE_Y - 7 * OFFSET) / 2;
             int padding = (OFFSET - SIZE) / 2;
             Color woodDark = new(101, 67, 33, 180), woodLight = new(193, 154, 107, 180);
+
+            Raylib.DrawTextureEx(boardImg, new(startX, startY), 0.0f, 0.5f, Color.Beige);
             for (int y = 0; y < Board.Size; y++)
                 for (int x = 0; x < Board.Size; x++)
                 {
                     int px = startX + x * OFFSET, py = startY + y * OFFSET;
-                    Raylib.DrawRectangle(px, py, OFFSET, OFFSET, (x + y) % 2 == 0 ? woodLight : woodDark);
-                    Raylib.DrawRectangleLines(px, py, OFFSET, OFFSET, Color.Black);
-                    if (selX == x && selY == y) Raylib.DrawRectangle(px, py, OFFSET, OFFSET, new Color(0, 121, 241, 100));
+                    // Raylib.DrawRectangle(px, py, OFFSET, OFFSET, (x + y) % 2 == 0 ? woodLight : woodDark);
+                    // Raylib.DrawRectangleLines(px, py, OFFSET, OFFSET, Color.Black);
+                    // if (selX == x && selY == y) Raylib.DrawRectangle(px, py, OFFSET, OFFSET, new Color(0, 121, 241, 100));
 
                     foreach (var m in legalMoves)
                     {
