@@ -20,6 +20,9 @@ namespace Dittle
         public static List<Move> GetAllLegalMoves(Board board, Player player)
         {
             List<Move> moves = [];
+            int horizontalCount = (player == Player.White) ? board.WhiteHorizontalMoves : board.BlackHorizontalMoves;
+            bool mustMoveForward = horizontalCount >= Board.MaxHorizontalMoves;
+
             for (int y = 0; y < Board.Size; y++)
             {
                 for (int x = 0; x < Board.Size; x++)
@@ -31,6 +34,17 @@ namespace Dittle
                     }
                 }
             }
+
+            if (mustMoveForward)
+            {
+                int forwardYDir = (player == Player.White) ? -1 : 1;
+                var forwardMoves = moves.FindAll(m => (m.ToY - m.FromY) * forwardYDir > 0);
+                if (forwardMoves.Count > 0)
+                {
+                    return forwardMoves;
+                }
+            }
+
             return moves;
         }
 

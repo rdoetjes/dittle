@@ -142,7 +142,10 @@ namespace Dittle
     public class Board
     {
         public const int Size = 7;
+        public const int MaxHorizontalMoves = 4;
         public Die?[,] Grid = new Die?[Size, Size];
+        public int WhiteHorizontalMoves = 0;
+        public int BlackHorizontalMoves = 0;
 
         public Board()
         {
@@ -162,7 +165,11 @@ namespace Dittle
 
         public Board Clone()
         {
-            Board b = new();
+            Board b = new()
+            {
+                WhiteHorizontalMoves = this.WhiteHorizontalMoves,
+                BlackHorizontalMoves = this.BlackHorizontalMoves
+            };
             for (int y = 0; y < Size; y++)
                 for (int x = 0; x < Size; x++)
                     b.Grid[x, y] = this.Grid[x, y];

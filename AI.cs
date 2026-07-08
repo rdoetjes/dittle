@@ -69,6 +69,19 @@ namespace Dittle
         {
             board.Grid[move.FromX, move.FromY] = null;
             board.Grid[move.ToX, move.ToY] = move.ResultDie;
+
+            // Update horizontal move tracking
+            bool isHorizontal = move.FromY == move.ToY;
+            if (move.ResultDie.Owner == Player.White)
+            {
+                if (isHorizontal) board.WhiteHorizontalMoves++;
+                else board.WhiteHorizontalMoves = 0;
+            }
+            else
+            {
+                if (isHorizontal) board.BlackHorizontalMoves++;
+                else board.BlackHorizontalMoves = 0;
+            }
         }
     }
 }
