@@ -11,7 +11,7 @@ namespace Dittle
         const int SIZE = 50;
         const int BOARD_SIZE_X = 500;
         const int BOARD_SIZE_Y = 600;
-        public const int DefaultAiDepth = 6;
+        public const int DefaultAiDepth = 3;
         public const int MaxAiDepth = 6;
 
         static Font customFont;
