@@ -41,7 +41,7 @@ namespace Dittle
             }
 
             Raylib.InitWindow(BOARD_SIZE_X, BOARD_SIZE_Y, "Dittle");
-            Raylib.SetTargetFPS(60);
+            Raylib.SetTargetFPS(30);
 
             LoadResources();
             Board board = new();
