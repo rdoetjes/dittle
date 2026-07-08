@@ -13,7 +13,7 @@ namespace Dittle
 
             // To introduce variety, we store evaluations of all moves
             var moveEvaluations = new List<(Move move, int score)>();
-            object lockObj = new object();
+            object lockObj = new();
 
             Parallel.ForEach(moves, move =>
             {
@@ -33,11 +33,12 @@ namespace Dittle
             // Find the best score
             int bestVal = int.MinValue;
             foreach (var item in moveEvaluations)
+            {
                 if (item.score > bestVal) bestVal = item.score;
+            }
 
             // Collect all moves that share the best score
             var bestMoves = moveEvaluations.FindAll(m => m.score == bestVal);
-
             // Randomly select one of the best moves so the AI isn't deterministic
             Random rng = new();
             return bestMoves[rng.Next(bestMoves.Count)].move;
