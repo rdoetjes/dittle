@@ -152,14 +152,22 @@ namespace Dittle
         {
             if (!Raylib.IsMouseButtonPressed(MouseButton.Left)) return false;
             Vector2 m = Raylib.GetMousePosition();
+
+            // Restart is always allowed
             if (Raylib.CheckCollisionPointRec(m, new Rectangle(BOARD_SIZE_X - 120, 10, 100, 30)))
             {
                 board = new Board(); current = Player.White;
                 selX = null; selY = null; moves.Clear(); lastAi = null;
                 return true;
             }
-            if (Raylib.CheckCollisionPointRec(m, new Rectangle(210, BOARD_SIZE_Y - 80, 40, 40)) && depth > 1) { depth--; return true; }
-            if (Raylib.CheckCollisionPointRec(m, new Rectangle(310, BOARD_SIZE_Y - 80, 40, 40)) && depth < MaxAiDepth) { depth++; return true; }
+
+            // Only allow Level adjustments if game is NOT over
+            if (!Rules.IsGameOver(board, out _))
+            {
+                if (Raylib.CheckCollisionPointRec(m, new Rectangle(210, BOARD_SIZE_Y - 80, 40, 40)) && depth > 1) { depth--; return true; }
+                if (Raylib.CheckCollisionPointRec(m, new Rectangle(310, BOARD_SIZE_Y - 80, 40, 40)) && depth < MaxAiDepth) { depth++; return true; }
+            }
+
             return false;
         }
 
