@@ -35,8 +35,10 @@ namespace Dittle
 
             // Collect all moves that share the best score
             var bestMoves = moveEvaluations.FindAll(m => m.score == bestVal);
+
             // Randomly select one of the best moves so the AI isn't deterministic
             Random rng = new();
+
             return bestMoves[rng.Next(bestMoves.Count)].move;
         }
 
