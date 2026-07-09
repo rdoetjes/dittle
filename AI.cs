@@ -69,10 +69,8 @@ namespace Dittle
             // Collect all moves that share the best score
             var bestMoves = moveEvaluations.FindAll(m => m.score == bestVal);
 
-            // Randomly select one of the best moves so the AI isn't deterministic
-            Random rng = new();
-
-            return bestMoves[rng.Next(bestMoves.Count)].move;
+            // Use a static or shared Random to ensure better distribution
+            return bestMoves[Random.Shared.Next(bestMoves.Count)].move;
         }
 
         private static int Minimax(Board board, int depth, int alpha, int beta, bool maximizing, Player player)
@@ -132,6 +130,9 @@ namespace Dittle
                 if (isHorizontal) board.BlackHorizontalMoves++;
                 else board.BlackHorizontalMoves = 0;
             }
+
+            // Switch turn
+            board.CurrentTurn = (board.CurrentTurn == Player.White) ? Player.Black : Player.White;
         }
     }
 }

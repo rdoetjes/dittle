@@ -124,7 +124,6 @@ namespace Dittle
             _ = AI.PerformAiTurnAsync(currentBoard, currentDepth, (bestMove) => {
                 AI.ApplyMove(board, bestMove);
                 lastAiMove = bestMove;
-                board.CurrentTurn = (board.CurrentTurn == Player.White) ? Player.Black : Player.White;
                 aiMoveTimer = isFastMode ? 0.1f : 1.5f;
                 isAiThinking = false;
             });

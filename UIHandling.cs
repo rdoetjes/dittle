@@ -76,7 +76,6 @@ namespace Dittle
                 if (moveIdx != -1)
                 {
                     AI.ApplyMove(board, moves[moveIdx]);
-                    currentPlayer = (currentPlayer == Player.White) ? Player.Black : Player.White;
                 }
                 selX = null;
                 selY = null;
