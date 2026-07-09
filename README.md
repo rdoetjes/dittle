@@ -75,15 +75,27 @@ To play against the AI (Player 1 is White, AI is Black):
 ```bash
 dittle -players 1 -depth 4
 ```
+or
+```bash
+dotnet run -- -players 1 -depth 4
+```
 
 To watch the AI play against itself (Simulation mode):
 ```bash
 dittle -players 0 -depth 3
 ```
+or
+```bash
+dotnet run -- -players 0 -depth 3
+```
 
-To play against another human:
+To play against another human, in a turn based game:
 ```bash
 dittle -players 2
+```
+or
+```bash
+dotnet run -- -players 1
 ```
 
 ### Arguments
