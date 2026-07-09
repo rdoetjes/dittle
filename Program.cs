@@ -271,7 +271,7 @@ namespace Dittle
         private static void DrawBoard(Board board, int? selX, int? selY, List<Move> legalMoves)
         {
             int startX = (BOARD_SIZE_X - 7 * OFFSET) / 2, startY = (BOARD_SIZE_Y - 7 * OFFSET) / 2;
-            int padding = (OFFSET - SIZE) / 2;
+            int padding = ((OFFSET - SIZE) / 2)-5;
 
             //Sand bankground
             Raylib.DrawTexturePro(bgImg,
@@ -295,7 +295,7 @@ namespace Dittle
                     }
 
                     Die? d = board.Grid[x, y];
-                    if (d is not null && d.HasValue) DrawDie(px + padding, py + padding, SIZE, d.Value);
+                    if (d is not null && d.HasValue) DrawDie(px + padding, py + padding, SIZE+10, d.Value);
                 }
         }
 
@@ -393,15 +393,6 @@ namespace Dittle
             {
                 float scale = (float)size / tex.Width;
                 Raylib.DrawTextureEx(tex, new Vector2(x, y), 0f, scale, Color.White);
-            }
-            else
-            {
-                // Fallback if texture failed to load
-                Color dieColor = die.Owner == Player.White ? Color.White : Color.Black;
-                Rectangle rec = new(x, y, size, size);
-                Raylib.DrawRectangleRounded(rec, 0.2f, 10, dieColor);
-                Raylib.DrawRectangleRoundedLines(rec, 0.2f, 10, Color.Gray);
-                // (Old pip drawing logic could go here if we wanted to keep it as fallback)
             }
         }
     }
