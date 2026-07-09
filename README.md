@@ -23,20 +23,27 @@ Movement is restricted to **forward** or **sideways** (no backward or diagonal m
 - **L-shaped Jump**: A combination of a vertical jump and a horizontal jump. Both segments must jump over at least one die, separated by a gap (e.g., Jump over a die to a gap, then jump over another die horizontally to a final gap).
 
 ### Jump Examples
-`.` = Empty, `X` = Other Die, `D` = Your Die, `L` = Legal Landing
+`.` = Empty square, `X` = Other Die, `D` = Your Die, `L` = Legal Landing
 
-**Straight Jump (Multi-jump):**
-`D X L X L` - Legal (Two jumps, landing in either `L`)
-`D X X L` - **Illegal** (No gap between `X`s)
-`D . X L` - **Illegal** (Must be adjacent to `X` to start)
+**Legal Multi-Jump:**
+`D X L X L`
+(One or two jumps possible, landing in either `L`)
 
-**L-Jump:**
+**Illegal Tight Cluster:**
+`D X X L` 
+(Illegal: Cannot jump two dice that are touching)
+
+**Illegal Gap Start:**
+`D . X L`
+(Illegal: Must be immediately adjacent to `X` to start a jump)
+
+**Legal L-Jump:**
 ```
 . . L
 . . X
 D X .
 ```
-(Jump Up over X to gap, then jump Right over X to L)
+(Jump Up over X to the gap, then jump Right over X to landing `L`)
 - **Forced forward move**: After 4 consecutive horizontal moves, you are forced to move forward if any forward move is possible.
 
 ### Winning
