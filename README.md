@@ -1,8 +1,8 @@
 # Dittle
 
-A digital implementation of the strategy board game **Dittle**, built using C#, RayLib, and .NET 10. This project features a 3D-accurate dice simulation and a Minimax AI.
+A digital implementation of the strategy board game **Dittle**, built using C#, RayLib, and .NET 10. This project features a digital version of the board game Dittle. Which is a dice game where you move dice strategically removing chance from the equation.
 
-*Note: This is a quick and dirty evening project.*
+*Note: This is a quick and dirty evening project. So not tests, the best test is AI playing itself*
 
 ## The Rules of Dittle
 
