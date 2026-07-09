@@ -46,6 +46,7 @@ namespace Dittle
                     if (isAiTurn && aiMoveTimer <= 0)
                     {
                         AI.PerformAiTurn(board, aiDepth, ref lastAiMove, ref aiMoveTimer, ref currentPlayer);
+                        if (playersCount == 0) aiMoveTimer = 0.1f;
                     }
                     else if (!mouseHandled && playersCount > 0)
                     {
