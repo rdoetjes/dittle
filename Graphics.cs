@@ -232,6 +232,7 @@ namespace Dittle
 
         public static void DrawDie(int x, int y, int size, Die die)
         {
+            if (die.Top < 1 || die.Top > 6) return;
             Texture2D tex = (die.Owner == Player.White) ? whiteDice[die.Top - 1] : blackDice[die.Top - 1];
             if (tex.Id > 0)
             {

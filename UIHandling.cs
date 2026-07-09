@@ -71,10 +71,11 @@ namespace Dittle
             }
             else
             {
-                Move move = moves.Find(m => m.ToX == x && m.ToY == y);
-                if (move.FromX == selX && move.FromY == selY)
+                int tx = x, ty = y;
+                int moveIdx = moves.FindIndex(m => m.ToX == tx && m.ToY == ty);
+                if (moveIdx != -1)
                 {
-                    AI.ApplyMove(board, move);
+                    AI.ApplyMove(board, moves[moveIdx]);
                     currentPlayer = (currentPlayer == Player.White) ? Player.Black : Player.White;
                 }
                 selX = null;
