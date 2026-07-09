@@ -64,20 +64,26 @@ cd dittle
 dotnet build
 ```
 
+### Makefile Recipes
+The project includes a `Makefile` for common tasks:
+- `make release`: Publishes the application for Windows, macOS (Intel/Silicon), and Linux.
+- `make dist`: Runs the `package.sh` script to create distributable bundles (e.g., macOS .app).
+- `make sbom`: Generates a Software Bill of Materials (SBOM) using `syft` and scans it with `grype`.
+
 ### Run
 To play against the AI (Player 1 is White, AI is Black):
 ```bash
-dotnet run -- -players 1 -depth 4
+dittle -players 1 -depth 4
 ```
 
 To watch the AI play against itself (Simulation mode):
 ```bash
-dotnet run -- -players 0 -depth 3
+dittle -players 0 -depth 3
 ```
 
 To play against another human:
 ```bash
-dotnet run -- -players 2
+dittle -players 2
 ```
 
 ### Arguments
