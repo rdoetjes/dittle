@@ -7,17 +7,14 @@ namespace Dittle
 {
     public static class AI
     {
-        public static void PerformAiTurn(Board board, int depth, ref Move? lastMove, ref float timer, ref Player current)
+        public static async Task PerformAiTurnAsync(Board board, int depth, Action<Move> onMoveComplete)
         {
-            Player movingPlayer = current;
-            Move? best = GetBestMove(board, movingPlayer, depth);
+            Player movingPlayer = board.CurrentTurn; // I should add CurrentTurn to Board
+            Move? best = await Task.Run(() => GetBestMove(board, movingPlayer, depth));
             if (best.HasValue)
             {
-                lastMove = best.Value;
-                ApplyMove(board, best.Value);
-                timer = 1.5f;
+                onMoveComplete(best.Value);
             }
-            current = (movingPlayer == Player.White) ? Player.Black : Player.White;
         }
 
         public static Move? GetBestMove(Board board, Player player, int depth)

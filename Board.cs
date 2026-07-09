@@ -146,6 +146,7 @@ namespace Dittle
         public Die?[,] Grid = new Die?[Size, Size];
         public int WhiteHorizontalMoves = 0;
         public int BlackHorizontalMoves = 0;
+        public Player CurrentTurn = Player.White;
 
         public Board()
         {
@@ -168,7 +169,8 @@ namespace Dittle
             Board b = new()
             {
                 WhiteHorizontalMoves = this.WhiteHorizontalMoves,
-                BlackHorizontalMoves = this.BlackHorizontalMoves
+                BlackHorizontalMoves = this.BlackHorizontalMoves,
+                CurrentTurn = this.CurrentTurn
             };
             for (int y = 0; y < Size; y++)
                 for (int x = 0; x < Size; x++)

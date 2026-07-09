@@ -182,27 +182,35 @@ namespace Dittle
             }
         }
 
-        public static void DrawUI(int depth, Player current, Board board, int maxAiDepth)
+        public static void DrawUI(int depth, Player current, Board board, int maxAiDepth, float matchTime, float whiteThinkTime, float blackThinkTime, bool isAiThinking)
         {
-            int uiBottomY = BOARD_SIZE_Y - 80;
+            int uiBottomY = BOARD_SIZE_X + 10; // BOARD_SIZE_Y is 600, BOARD_SIZE_X is 500. Board is 7*60=420.
+            
+            // Match Time at top
+            string matchTimeStr = $"TIME: {TimeSpan.FromSeconds(matchTime):mm\\:ss}";
+            DrawTextCustom(matchTimeStr, 10, 35, 18, Color.DarkBrown);
+
+            int uiControlY = BOARD_SIZE_Y - 80;
             Raylib.DrawRectangleLinesEx(new Rectangle(BOARD_SIZE_X - 120, 10, 100, 30), 2, Color.DarkBrown);
             DrawTextCustom(" RESTART", BOARD_SIZE_X - 110, 18, 16, Color.DarkBrown);
 
-            DrawTextCustom("LEVEL:", 100, uiBottomY + 14, 20, Color.DarkBrown);
-            Raylib.DrawRectangle(210, uiBottomY, 40, 40, Color.Beige);
-            DrawTextCustom("-", 225, uiBottomY + 5, 30, Color.Black);
+            DrawTextCustom("LEVEL:", 100, uiControlY + 14, 20, Color.DarkBrown);
+            Raylib.DrawRectangle(210, uiControlY, 40, 40, Color.Beige);
+            DrawTextCustom("-", 225, uiControlY + 5, 30, Color.Black);
 
-            Raylib.DrawRectangle(310, uiBottomY, 40, 40, Color.Beige);
-            DrawTextCustom("+", 321, uiBottomY + 5, 30, Color.Black);
+            Raylib.DrawRectangle(310, uiControlY, 40, 40, Color.Beige);
+            DrawTextCustom("+", 321, uiControlY + 5, 30, Color.Black);
 
             string dText = depth.ToString();
             int textW = 10;
             if (customFont.Texture.Id > 0) textW = (int)Raylib.MeasureTextEx(customFont, dText, 24, 2).X;
             else textW = Raylib.MeasureText(dText, 24);
 
-            DrawTextCustom(dText, 250 + (60 - textW) / 2, uiBottomY + 10, 25, Color.DarkBrown);
+            DrawTextCustom(dText, 250 + (60 - textW) / 2, uiControlY + 10, 25, Color.DarkBrown);
 
-            DrawTextCustom($"TURN: {current.ToString().ToUpper()}", 10, 10, 20, Color.DarkBrown);
+            string turnText = isAiThinking ? $"THINKING: {current.ToString().ToUpper()}" : $"TURN: {current.ToString().ToUpper()}";
+            DrawTextCustom(turnText, 10, 10, 20, Color.DarkBrown);
+
             if (Rules.IsGameOver(board, out Player? w))
             {
                 string winnerText = $"WINNER: {w}";
@@ -217,6 +225,16 @@ namespace Dittle
             // The number of horizontal move indicators
             DrawHorizontalMoves(Player.White, (uint)board.WhiteHorizontalMoves);
             DrawHorizontalMoves(Player.Black, (uint)board.BlackHorizontalMoves);
+
+            // Think times next to LEDs
+            int startX = (BOARD_SIZE_X - 7 * OFFSET) / 2;
+            int boardHeight = 7 * OFFSET;
+            int startY = (BOARD_SIZE_Y - boardHeight) / 2;
+            
+            string wThink = $"{whiteThinkTime:F1}s";
+            string bThink = $"{blackThinkTime:F1}s";
+            DrawTextCustom(wThink, startX + 4 * 22 + 20, startY + boardHeight + 10, 16, Color.DarkBrown);
+            DrawTextCustom(bThink, startX + 4 * 22 + 20, startY - 25, 16, Color.DarkBrown);
         }
 
         public static void DrawAiMoveHighlight(Move? lastMove, float timer)
