@@ -9,14 +9,15 @@ namespace Dittle
     {
         public static void PerformAiTurn(Board board, int depth, ref Move? lastMove, ref float timer, ref Player current)
         {
-            Move? best = GetBestMove(board, Player.Black, depth);
+            Player movingPlayer = current;
+            Move? best = GetBestMove(board, movingPlayer, depth);
             if (best.HasValue)
             {
                 lastMove = best.Value;
                 ApplyMove(board, best.Value);
                 timer = 1.5f;
             }
-            current = Player.White;
+            current = (movingPlayer == Player.White) ? Player.Black : Player.White;
         }
 
         public static Move? GetBestMove(Board board, Player player, int depth)

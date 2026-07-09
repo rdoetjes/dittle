@@ -41,11 +41,13 @@ namespace Dittle
 
                 if (!Rules.IsGameOver(board, out _))
                 {
-                    if (playersCount == 1 && currentPlayer == Player.Black && aiMoveTimer <= 0)
+                    bool isAiTurn = (playersCount == 0) || (playersCount == 1 && currentPlayer == Player.Black);
+
+                    if (isAiTurn && aiMoveTimer <= 0)
                     {
                         AI.PerformAiTurn(board, aiDepth, ref lastAiMove, ref aiMoveTimer, ref currentPlayer);
                     }
-                    else if (!mouseHandled)
+                    else if (!mouseHandled && playersCount > 0)
                     {
                         UIHandling.HandleBoardInput(board, ref currentPlayer, ref selectedX, ref selectedY, ref legalMoves);
                     }
