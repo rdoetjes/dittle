@@ -17,6 +17,8 @@ namespace Dittle
         static Font customFont;
         static Texture2D bgImg;
         static Texture2D boardImg;
+        static Texture2D[] whiteDice = new Texture2D[6];
+        static Texture2D[] blackDice = new Texture2D[6];
 
         private static void LoadResources()
         {
@@ -24,7 +26,7 @@ namespace Dittle
             string fontPath = "resources/fonts/revvy.ttf";
             // Fallback for MacOS App Bundle where working directory is Resources/
             if (!System.IO.File.Exists(fontPath) && System.IO.File.Exists("fonts/revvy.ttf")) fontPath = "fonts/revvy.ttf";
-            
+
             if (System.IO.File.Exists(fontPath))
             {
                 customFont = Raylib.LoadFontEx(fontPath, 64, null, 0);
@@ -38,6 +40,33 @@ namespace Dittle
             string boardPath = "resources/img/board.png";
             if (!System.IO.File.Exists(boardPath) && System.IO.File.Exists("img/board.png")) boardPath = "img/board.png";
             if (System.IO.File.Exists(boardPath)) boardImg = Raylib.LoadTexture(boardPath);
+
+            LoadDiceTextures();
+        }
+
+        private static void LoadDiceTextures()
+        {
+            for (int i = 1; i <= 6; i++)
+            {
+                whiteDice[i - 1] = LoadDiceTexture(i, "white");
+                blackDice[i - 1] = LoadDiceTexture(i, "black");
+            }
+        }
+
+        private static Texture2D LoadDiceTexture(int value, string color)
+        {
+            string[] paths = {
+                $"resources/img/{value}_{color}.png",
+                $"resources/img/{value}_{color}.jpg",
+                $"img/{value}_{color}.png",
+                $"img/{value}_{color}.jpg"
+            };
+
+            foreach (var path in paths)
+            {
+                if (System.IO.File.Exists(path)) return Raylib.LoadTexture(path);
+            }
+            return new Texture2D();
         }
 
         private static void UnloadResources()
@@ -45,6 +74,11 @@ namespace Dittle
             if (customFont.Texture.Id > 0) Raylib.UnloadFont(customFont);
             if (bgImg.Id > 0) Raylib.UnloadTexture(bgImg);
             if (boardImg.Id > 0) Raylib.UnloadTexture(boardImg);
+            for (int i = 0; i < 6; i++)
+            {
+                if (whiteDice[i].Id > 0) Raylib.UnloadTexture(whiteDice[i]);
+                if (blackDice[i].Id > 0) Raylib.UnloadTexture(blackDice[i]);
+            }
         }
 
         private static void InitializeResourcePath()
@@ -255,7 +289,7 @@ namespace Dittle
                     {
                         if (m.ToX == x && m.ToY == y)
                         {
-                            Raylib.DrawCircle(px + OFFSET / 2, py + OFFSET / 2, OFFSET / 4, new Color(0, 121, 241, 200));
+                            Raylib.DrawCircle(px + OFFSET / 2, py + OFFSET / 2, OFFSET / 4, new(0, 121, 241, 200));
                             DrawTextCustom(m.ResultDie.Top.ToString(), px + OFFSET / 2 - 5, py + OFFSET / 2 - 8, 18, Color.White);
                         }
                     }
@@ -354,28 +388,21 @@ namespace Dittle
 
         static void DrawDie(int x, int y, int size, Die die)
         {
-            Color dieColor = die.Owner == Player.White ? Color.White : Color.Black;
-            Color pipColor = die.Owner == Player.White ? Color.Black : Color.White;
-            Rectangle rec = new(x, y, size, size);
-            Raylib.DrawRectangleRounded(rec, 0.2f, 10, dieColor);
-            Raylib.DrawRectangleRoundedLines(rec, 0.2f, 10, Color.Gray);
-            int r = size / 10, m = size / 2, q1 = size / 4, q3 = 3 * size / 4;
-            switch (die.Top)
+            Texture2D tex = (die.Owner == Player.White) ? whiteDice[die.Top - 1] : blackDice[die.Top - 1];
+            if (tex.Id > 0)
             {
-                case 1: DrawPips1(x, y, m, r, pipColor); break;
-                case 2: DrawPips2(x, y, q1, q3, r, pipColor); break;
-                case 3: DrawPips3(x, y, m, q1, q3, r, pipColor); break;
-                case 4: DrawPips4(x, y, q1, q3, r, pipColor); break;
-                case 5: DrawPips5(x, y, m, q1, q3, r, pipColor); break;
-                case 6: DrawPips6(x, y, m, q1, q3, r, pipColor); break;
+                float scale = (float)size / tex.Width;
+                Raylib.DrawTextureEx(tex, new Vector2(x, y), 0f, scale, Color.White);
+            }
+            else
+            {
+                // Fallback if texture failed to load
+                Color dieColor = die.Owner == Player.White ? Color.White : Color.Black;
+                Rectangle rec = new(x, y, size, size);
+                Raylib.DrawRectangleRounded(rec, 0.2f, 10, dieColor);
+                Raylib.DrawRectangleRoundedLines(rec, 0.2f, 10, Color.Gray);
+                // (Old pip drawing logic could go here if we wanted to keep it as fallback)
             }
         }
-
-        private static void DrawPips1(int x, int y, int m, int r, Color c) => Raylib.DrawCircle(x + m, y + m, r, c);
-        private static void DrawPips2(int x, int y, int q1, int q3, int r, Color c) { Raylib.DrawCircle(x + q1, y + q1, r, c); Raylib.DrawCircle(x + q3, y + q3, r, c); }
-        private static void DrawPips3(int x, int y, int m, int q1, int q3, int r, Color c) { Raylib.DrawCircle(x + m, y + m, r, c); DrawPips2(x, y, q1, q3, r, c); }
-        private static void DrawPips4(int x, int y, int q1, int q3, int r, Color c) { Raylib.DrawCircle(x + q1, y + q1, r, c); Raylib.DrawCircle(x + q3, y + q1, r, c); Raylib.DrawCircle(x + q1, y + q3, r, c); Raylib.DrawCircle(x + q3, y + q3, r, c); }
-        private static void DrawPips5(int x, int y, int m, int q1, int q3, int r, Color c) { Raylib.DrawCircle(x + m, y + m, r, c); DrawPips4(x, y, q1, q3, r, c); }
-        private static void DrawPips6(int x, int y, int m, int q1, int q3, int r, Color c) { Raylib.DrawCircle(x + q1, y + q1, r, c); Raylib.DrawCircle(x + q3, y + q1, r, c); Raylib.DrawCircle(x + q1, y + m, r, c); Raylib.DrawCircle(x + q3, y + m, r, c); Raylib.DrawCircle(x + q1, y + q3, r, c); Raylib.DrawCircle(x + q3, y + q3, r, c); }
     }
 }
