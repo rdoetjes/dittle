@@ -38,6 +38,7 @@ Movement is restricted to **forward** or **sideways** (no backward or diagonal m
 D X .
 ```
 (Jump Up over X to the gap, then jump Right over X to landing `L`)
+
 - **Forced forward move**: After 4 consecutive horizontal moves, you are forced to move forward if any forward move is possible.
 
 ### Winning
