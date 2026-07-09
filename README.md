@@ -113,3 +113,7 @@ The test was done playing the game against itself.
 ```bash
 dittle -players 0 -depth 3
 ```
+or
+```bash
+dotnet run -- -players 0 -depth 3
+```
