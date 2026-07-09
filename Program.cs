@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Raylib_cs;
 
 namespace Dittle
@@ -8,99 +9,141 @@ namespace Dittle
         public const int DefaultAiDepth = 3;
         public const int MaxAiDepth = 6;
 
+        // Game State
+        private static Board board = new();
+        private static int playersCount = 1;
+        private static int aiDepth = DefaultAiDepth;
+        private static int? selectedX = null, selectedY = null;
+        private static List<Move> legalMoves = [];
+        private static Move? lastAiMove = null;
+        private static float aiMoveTimer = 0;
+        private static bool isAiThinking = false;
+        
+        // Timers
+        private static float matchTime = 0;
+        private static float whiteThinkTime = 0;
+        private static float blackThinkTime = 0;
+
         public static void Main(string[] args)
         {
+            Initialize(args);
+
+            while (!Raylib.WindowShouldClose())
+            {
+                Update();
+                Draw();
+            }
+
+            Cleanup();
+        }
+
+        private static void Initialize(string[] args)
+        {
             Graphics.InitializeResourcePath();
+            ParseArguments(args);
 
-            int playersCount = 1;
-            int aiDepth = DefaultAiDepth;
+            Raylib.InitWindow(Graphics.BOARD_SIZE_X, Graphics.BOARD_SIZE_Y, "Dittle");
+            Raylib.SetTargetFPS(30);
+            Graphics.LoadResources();
+        }
 
+        private static void ParseArguments(string[] args)
+        {
             for (int i = 0; i < args.Length; i++)
             {
                 if (args[i] == "-players" && i + 1 < args.Length) playersCount = int.Parse(args[++i]);
                 if (args[i] == "-depth" && i + 1 < args.Length) aiDepth = int.Parse(args[++i]);
             }
+        }
 
-            Raylib.InitWindow(Graphics.BOARD_SIZE_X, Graphics.BOARD_SIZE_Y, "Dittle");
-            Raylib.SetTargetFPS(30);
+        private static void Update()
+        {
+            float deltaTime = Raylib.GetFrameTime();
+            if (aiMoveTimer > 0) aiMoveTimer -= deltaTime;
 
-            Graphics.LoadResources();
-            Board board = new();
-            int? selectedX = null, selectedY = null;
-            List<Move> legalMoves = [];
-            Move? lastAiMove = null;
-            float aiMoveTimer = 0;
-            bool isAiThinking = false;
+            UpdateTimers(deltaTime);
+            HandleInput();
             
-            float matchTime = 0;
-            float whiteThinkTime = 0;
-            float blackThinkTime = 0;
-
-            while (!Raylib.WindowShouldClose())
+            if (!Rules.IsGameOver(board, out _))
             {
-                float deltaTime = Raylib.GetFrameTime();
-                if (aiMoveTimer > 0) aiMoveTimer -= deltaTime;
-                
-                if (!Rules.IsGameOver(board, out _))
-                {
-                    matchTime += deltaTime;
-                    if (board.CurrentTurn == Player.White) whiteThinkTime += deltaTime;
-                    else blackThinkTime += deltaTime;
-                }
-
-                bool mouseHandled = UIHandling.HandleUIInput(ref board, ref board.CurrentTurn, ref aiDepth, ref selectedX, ref selectedY, ref legalMoves, ref lastAiMove, MaxAiDepth);
-                if (mouseHandled) 
-                {
-                    // Reset times on restart
-                    if (board.IsInitialBoard() && board.WhiteHorizontalMoves == 0 && board.BlackHorizontalMoves == 0)
-                    {
-                        AI.CancelAi();
-                        matchTime = 0;
-                        whiteThinkTime = 0;
-                        blackThinkTime = 0;
-                        isAiThinking = false;
-                        aiMoveTimer = 0;
-                    }
-                }
-
-                if (!Rules.IsGameOver(board, out _))
-                {
-                    bool isAiTurn = (playersCount == 0) || (playersCount == 1 && board.CurrentTurn == Player.Black);
-
-                    if (isAiTurn && aiMoveTimer <= 0 && !isAiThinking)
-                    {
-                        isAiThinking = true;
-                        var currentBoard = board.Clone();
-                        var currentDepth = aiDepth;
-                        var isFastMode = (playersCount == 0);
-                        
-                        _ = AI.PerformAiTurnAsync(currentBoard, currentDepth, (bestMove) => {
-                            AI.ApplyMove(board, bestMove);
-                            lastAiMove = bestMove;
-                            board.CurrentTurn = (board.CurrentTurn == Player.White) ? Player.Black : Player.White;
-                            aiMoveTimer = isFastMode ? 0.1f : 1.5f;
-                            isAiThinking = false;
-                        });
-                    }
-                    else if (!mouseHandled && playersCount > 0 && !isAiThinking)
-                    {
-                        Player prevTurn = board.CurrentTurn;
-                        UIHandling.HandleBoardInput(board, ref board.CurrentTurn, ref selectedX, ref selectedY, ref legalMoves);
-                        if (prevTurn != board.CurrentTurn)
-                        {
-                             // Player just moved
-                        }
-                    }
-                }
-
-                Raylib.BeginDrawing();
-                Raylib.ClearBackground(Color.DarkGray);
-                Graphics.DrawBoard(board, selectedX, selectedY, legalMoves);
-                Graphics.DrawUI(aiDepth, board.CurrentTurn, board, MaxAiDepth, matchTime, whiteThinkTime, blackThinkTime, isAiThinking);
-                Graphics.DrawAiMoveHighlight(lastAiMove, aiMoveTimer);
-                Raylib.EndDrawing();
+                HandleTurnLogic();
             }
+        }
 
+        private static void UpdateTimers(float deltaTime)
+        {
+            if (!Rules.IsGameOver(board, out _))
+            {
+                matchTime += deltaTime;
+                if (board.CurrentTurn == Player.White) whiteThinkTime += deltaTime;
+                else blackThinkTime += deltaTime;
+            }
+        }
+
+        private static void HandleInput()
+        {
+            bool mouseHandled = UIHandling.HandleUIInput(ref board, ref board.CurrentTurn, ref aiDepth, ref selectedX, ref selectedY, ref legalMoves, ref lastAiMove, MaxAiDepth);
+            
+            if (mouseHandled && board.IsInitialBoard() && board.WhiteHorizontalMoves == 0 && board.BlackHorizontalMoves == 0)
+            {
+                ResetGame();
+            }
+        }
+
+        private static void ResetGame()
+        {
+            AI.CancelAi();
+            matchTime = 0;
+            whiteThinkTime = 0;
+            blackThinkTime = 0;
+            isAiThinking = false;
+            aiMoveTimer = 0;
+        }
+
+        private static void HandleTurnLogic()
+        {
+            bool isAiTurn = (playersCount == 0) || (playersCount == 1 && board.CurrentTurn == Player.Black);
+
+            if (isAiTurn && aiMoveTimer <= 0 && !isAiThinking)
+            {
+                TriggerAiMove();
+            }
+            else if (playersCount > 0 && !isAiThinking)
+            {
+                UIHandling.HandleBoardInput(board, ref board.CurrentTurn, ref selectedX, ref selectedY, ref legalMoves);
+            }
+        }
+
+        private static void TriggerAiMove()
+        {
+            isAiThinking = true;
+            var currentBoard = board.Clone();
+            var currentDepth = aiDepth;
+            var isFastMode = (playersCount == 0);
+
+            _ = AI.PerformAiTurnAsync(currentBoard, currentDepth, (bestMove) => {
+                AI.ApplyMove(board, bestMove);
+                lastAiMove = bestMove;
+                board.CurrentTurn = (board.CurrentTurn == Player.White) ? Player.Black : Player.White;
+                aiMoveTimer = isFastMode ? 0.1f : 1.5f;
+                isAiThinking = false;
+            });
+        }
+
+        private static void Draw()
+        {
+            Raylib.BeginDrawing();
+            Raylib.ClearBackground(Color.DarkGray);
+
+            Graphics.DrawBoard(board, selectedX, selectedY, legalMoves);
+            Graphics.DrawUI(aiDepth, board.CurrentTurn, board, MaxAiDepth, matchTime, whiteThinkTime, blackThinkTime, isAiThinking);
+            Graphics.DrawAiMoveHighlight(lastAiMove, aiMoveTimer);
+
+            Raylib.EndDrawing();
+        }
+
+        private static void Cleanup()
+        {
             Graphics.UnloadResources();
             Raylib.CloseWindow();
         }
