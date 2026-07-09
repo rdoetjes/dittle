@@ -16,10 +16,27 @@ Dittle is a two-player strategy game played on a 7x7 board. The goal is to move 
 Movement is restricted to **forward** or **sideways** (no backward or diagonal moves).
 - **Tilt**: Roll a die one square. The upward-facing number changes physically.
 - **Jump**: Leap over one or more dice in a straight line (Vertical or Horizontal).
-    - **Requirement**: To initiate a jump, you must jump over a die that is **immediately adjacent**.
-    - **Requirement**: You cannot land on an occupied square or skip over multiple empty spaces (must land in the first available gap).
+    - **Requirement**: You must start by jumping over a die that is **immediately adjacent**.
+    - **Landing**: You must land in an empty square. If there are multiple dice in a row with empty spaces between them, you can continue jumping over them in the same move (e.g., Die-Gap-Die-Gap).
+    - **Gap Rule**: You cannot jump over two or more dice that are packed tightly together (Die-Die-Gap is illegal). There must be at least one empty space between each die being jumped.
 - **Tilt + Jump**: Tilt the die once, then perform a jump (Straight or L-shaped). The upward number changes once during the tilt, then remains constant during the jump phase.
-- **L-shaped Jump**: A combination of a vertical jump and a horizontal jump. Both segments must jump over at least one die.
+- **L-shaped Jump**: A combination of a vertical jump and a horizontal jump. Both segments must jump over at least one die, separated by a gap (e.g., Jump over a die to a gap, then jump over another die horizontally to a final gap).
+
+### Jump Examples
+`.` = Empty, `X` = Other Die, `D` = Your Die, `L` = Legal Landing
+
+**Straight Jump (Multi-jump):**
+`D X L X L` - Legal (Two jumps, landing in either `L`)
+`D X X L` - **Illegal** (No gap between `X`s)
+`D . X L` - **Illegal** (Must be adjacent to `X` to start)
+
+**L-Jump:**
+```
+. . L
+. . X
+D X .
+```
+(Jump Up over X to gap, then jump Right over X to L)
 - **Forced forward move**: After 4 consecutive horizontal moves, you are forced to move forward if any forward move is possible.
 
 ### Winning
