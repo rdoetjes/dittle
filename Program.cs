@@ -54,10 +54,12 @@ namespace Dittle
                     // Reset times on restart
                     if (board.IsInitialBoard() && board.WhiteHorizontalMoves == 0 && board.BlackHorizontalMoves == 0)
                     {
+                        AI.CancelAi();
                         matchTime = 0;
                         whiteThinkTime = 0;
                         blackThinkTime = 0;
                         isAiThinking = false;
+                        aiMoveTimer = 0;
                     }
                 }
 

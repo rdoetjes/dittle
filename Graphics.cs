@@ -184,8 +184,6 @@ namespace Dittle
 
         public static void DrawUI(int depth, Player current, Board board, int maxAiDepth, float matchTime, float whiteThinkTime, float blackThinkTime, bool isAiThinking)
         {
-            int uiBottomY = BOARD_SIZE_X + 10; // BOARD_SIZE_Y is 600, BOARD_SIZE_X is 500. Board is 7*60=420.
-            
             // Match Time at top
             string matchTimeStr = $"TIME: {TimeSpan.FromSeconds(matchTime):mm\\:ss}";
             DrawTextCustom(matchTimeStr, 10, 35, 18, Color.DarkBrown);

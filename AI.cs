@@ -7,14 +7,36 @@ namespace Dittle
 {
     public static class AI
     {
+        private static CancellationTokenSource? _aiCts;
+
         public static async Task PerformAiTurnAsync(Board board, int depth, Action<Move> onMoveComplete)
         {
-            Player movingPlayer = board.CurrentTurn; // I should add CurrentTurn to Board
-            Move? best = await Task.Run(() => GetBestMove(board, movingPlayer, depth));
-            if (best.HasValue)
+            _aiCts?.Cancel();
+            _aiCts = new CancellationTokenSource();
+            var token = _aiCts.Token;
+
+            Player movingPlayer = board.CurrentTurn;
+            try
             {
-                onMoveComplete(best.Value);
+                Move? best = await Task.Run(() => 
+                {
+                    // Pass token to GetBestMove if we want granular cancellation, 
+                    // but for now checking it before callback is a safe start.
+                    return GetBestMove(board, movingPlayer, depth);
+                }, token);
+
+                if (!token.IsCancellationRequested && best.HasValue)
+                {
+                    onMoveComplete(best.Value);
+                }
             }
+            catch (OperationCanceledException) { }
+        }
+
+        public static void CancelAi()
+        {
+            _aiCts?.Cancel();
+            _aiCts = null;
         }
 
         public static Move? GetBestMove(Board board, Player player, int depth)
