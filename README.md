@@ -15,11 +15,12 @@ Dittle is a two-player strategy game played on a 7x7 board. The goal is to move 
 ### Movement
 Movement is restricted to **forward** or **sideways** (no backward or diagonal moves).
 - **Tilt**: Roll a die one square. The upward-facing number changes physically.
-- **Jump**: Leap over one or more dice in a straight line.
-    - **Requirement**: You must be immediately adjacent to a die to jump it.
-    - **Requirement**: There must be at least one empty space between each die being jumped.
-- **Tilt + Jump**: Tilt the die once, then perform a jump (Straight or L-shaped). The upward number remains constant during the jump phase.
-- **Forced foreward move**: After 4 consecutive horizontal moves, you are forced to move forwards, unless not possible.
+- **Jump**: Leap over one or more dice in a straight line (Vertical or Horizontal).
+    - **Requirement**: To initiate a jump, you must jump over a die that is **immediately adjacent**.
+    - **Requirement**: You cannot land on an occupied square or skip over multiple empty spaces (must land in the first available gap).
+- **Tilt + Jump**: Tilt the die once, then perform a jump (Straight or L-shaped). The upward number changes once during the tilt, then remains constant during the jump phase.
+- **L-shaped Jump**: A combination of a vertical jump and a horizontal jump. Both segments must jump over at least one die.
+- **Forced forward move**: After 4 consecutive horizontal moves, you are forced to move forward if any forward move is possible.
 
 ### Winning
 The game ends immediately when one player has **all seven dice** in the opponent’s base row.
@@ -44,13 +45,18 @@ To play against the AI (Player 1 is White, AI is Black):
 dotnet run -- -players 1 -depth 4
 ```
 
+To watch the AI play against itself (Simulation mode):
+```bash
+dotnet run -- -players 0 -depth 3
+```
+
 To play against another human:
 ```bash
 dotnet run -- -players 2
 ```
 
 ### Arguments
-- `-players [1|2]`: Set number of human players.
+- `-players [0|1|2]`: Set number of human players (0 for AI vs AI).
 - `-depth [1-6]`: Set the AI's search depth (higher is harder).
 
 ## Controls
