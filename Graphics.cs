@@ -5,6 +5,18 @@ using System.Numerics;
 
 namespace Dittle
 {
+    public struct UiState
+    {
+        public int Depth;
+        public Player CurrentTurn;
+        public Board Board;
+        public int MaxAiDepth;
+        public float MatchTime;
+        public float WhiteThinkTime;
+        public float BlackThinkTime;
+        public bool IsAiThinking;
+    }
+
     public static class Graphics
     {
         public const int OFFSET = 60;
@@ -182,10 +194,10 @@ namespace Dittle
             }
         }
 
-        public static void DrawUI(int depth, Player current, Board board, int maxAiDepth, float matchTime, float whiteThinkTime, float blackThinkTime, bool isAiThinking)
+        public static void DrawUI(UiState state)
         {
             // Match Time at top
-            string matchTimeStr = $"TIME: {TimeSpan.FromSeconds(matchTime):mm\\:ss}";
+            string matchTimeStr = $"TIME: {TimeSpan.FromSeconds(state.MatchTime):mm\\:ss}";
             DrawTextCustom(matchTimeStr, 10, 35, 18, Color.DarkBrown);
 
             int uiControlY = BOARD_SIZE_Y - 80;
@@ -199,17 +211,17 @@ namespace Dittle
             Raylib.DrawRectangle(310, uiControlY, 40, 40, Color.Beige);
             DrawTextCustom("+", 321, uiControlY + 5, 30, Color.Black);
 
-            string dText = depth.ToString();
+            string dText = state.Depth.ToString();
             int textW = 10;
             if (customFont.Texture.Id > 0) textW = (int)Raylib.MeasureTextEx(customFont, dText, 24, 2).X;
             else textW = Raylib.MeasureText(dText, 24);
 
             DrawTextCustom(dText, 250 + (60 - textW) / 2, uiControlY + 10, 25, Color.DarkBrown);
 
-            string turnText = isAiThinking ? $"THINKING: {current.ToString().ToUpper()}" : $"TURN: {current.ToString().ToUpper()}";
+            string turnText = state.IsAiThinking ? $"THINKING: {state.CurrentTurn.ToString().ToUpper()}" : $"TURN: {state.CurrentTurn.ToString().ToUpper()}";
             DrawTextCustom(turnText, 10, 10, 20, Color.DarkBrown);
 
-            if (Rules.IsGameOver(board, out Player? w))
+            if (Rules.IsGameOver(state.Board, out Player? w))
             {
                 string winnerText = $"WINNER: {w}";
                 int winW = 100;
@@ -221,16 +233,16 @@ namespace Dittle
             }
 
             // The number of horizontal move indicators
-            DrawHorizontalMoves(Player.White, (uint)board.WhiteHorizontalMoves);
-            DrawHorizontalMoves(Player.Black, (uint)board.BlackHorizontalMoves);
+            DrawHorizontalMoves(Player.White, (uint)state.Board.WhiteHorizontalMoves);
+            DrawHorizontalMoves(Player.Black, (uint)state.Board.BlackHorizontalMoves);
 
             // Think times next to LEDs
             int startX = (BOARD_SIZE_X - 7 * OFFSET) / 2;
             int boardHeight = 7 * OFFSET;
             int startY = (BOARD_SIZE_Y - boardHeight) / 2;
             
-            string wThink = $"{whiteThinkTime:F1}s";
-            string bThink = $"{blackThinkTime:F1}s";
+            string wThink = $"{state.WhiteThinkTime:F1}s";
+            string bThink = $"{state.BlackThinkTime:F1}s";
             DrawTextCustom(wThink, startX + 4 * 22 + 20, startY + boardHeight + 10, 16, Color.DarkBrown);
             DrawTextCustom(bThink, startX + 4 * 22 + 20, startY - 25, 16, Color.DarkBrown);
         }

@@ -18,7 +18,7 @@ namespace Dittle
         private static Move? lastAiMove = null;
         private static float aiMoveTimer = 0;
         private static bool isAiThinking = false;
-        
+
         // Timers
         private static float matchTime = 0;
         private static float whiteThinkTime = 0;
@@ -63,7 +63,7 @@ namespace Dittle
 
             UpdateTimers(deltaTime);
             HandleInput();
-            
+
             if (!Rules.IsGameOver(board, out _))
             {
                 HandleTurnLogic();
@@ -83,7 +83,7 @@ namespace Dittle
         private static void HandleInput()
         {
             bool mouseHandled = UIHandling.HandleUIInput(ref board, ref board.CurrentTurn, ref aiDepth, ref selectedX, ref selectedY, ref legalMoves, ref lastAiMove, MaxAiDepth);
-            
+
             if (mouseHandled && board.IsInitialBoard() && board.WhiteHorizontalMoves == 0 && board.BlackHorizontalMoves == 0)
             {
                 ResetGame();
@@ -136,7 +136,21 @@ namespace Dittle
             Raylib.ClearBackground(Color.DarkGray);
 
             Graphics.DrawBoard(board, selectedX, selectedY, legalMoves);
-            Graphics.DrawUI(aiDepth, board.CurrentTurn, board, MaxAiDepth, matchTime, whiteThinkTime, blackThinkTime, isAiThinking);
+
+            var uiState = new UiState
+            {
+                Depth = aiDepth,
+                CurrentTurn = board.CurrentTurn,
+                Board = board,
+                MaxAiDepth = MaxAiDepth,
+                MatchTime = matchTime,
+                WhiteThinkTime = whiteThinkTime,
+                BlackThinkTime = blackThinkTime,
+                IsAiThinking = isAiThinking
+            };
+
+            Graphics.DrawUI(uiState);
+
             Graphics.DrawAiMoveHighlight(lastAiMove, aiMoveTimer);
 
             Raylib.EndDrawing();
