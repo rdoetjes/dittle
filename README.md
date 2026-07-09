@@ -93,5 +93,5 @@ dotnet run -- -players 2
 ## Tests
 The test was done playing the game against itself.
 ```bash
-dittle -players -depth 3
+dittle -players 0 -depth 3
 ```
