@@ -187,7 +187,7 @@ namespace Dittle
                 }
                 else
                 {
-                    // LED OFF - Just outline
+                    // LED OFF - Dark green
                     Raylib.DrawCircle(cx, cy, (float)radius, Color.DarkGreen);
                     Raylib.DrawCircle(cx - 2, cy - 2, (float)radius / 2, new(128, 128, 128, 200));
                 }
@@ -240,7 +240,7 @@ namespace Dittle
             int startX = (BOARD_SIZE_X - 7 * OFFSET) / 2;
             int boardHeight = 7 * OFFSET;
             int startY = (BOARD_SIZE_Y - boardHeight) / 2;
-            
+
             string wThink = $"{state.WhiteThinkTime:F1}s";
             string bThink = $"{state.BlackThinkTime:F1}s";
             DrawTextCustom(wThink, startX + 4 * 22 + 20, startY + boardHeight + 10, 16, Color.DarkBrown);
