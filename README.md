@@ -106,7 +106,7 @@ dotnet run -- -players 1
 - **Left Click**: Select a die. Legal moves will be highlighted with blue circles showing the future face value.
 - **Left Click (Target)**: Click a highlighted square to move.
 - **RESTART Button**: Resets the game state.
-- **AI DEPTH +/-**: Adjust the difficulty in real-time.
+- **AI DEPTH +/-**: Adjust the difficulty this can only be done after a restart and before a move has been excuted
 
 ## Tests
 The test was done playing the game against itself.
