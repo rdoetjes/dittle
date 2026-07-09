@@ -178,6 +178,30 @@ namespace Dittle
 
         public bool IsInBounds(int x, int y) => x >= 0 && x < Size && y >= 0 && y < Size;
 
+        public bool IsInitialBoard()
+        {
+            for (int y = 0; y < Size; y++)
+            {
+                for (int x = 0; x < Size; x++)
+                {
+                    Die? d = Grid[x, y];
+                    if (y == 0)
+                    {
+                        if (d == null || d.Value.Owner != Player.Black) return false;
+                    }
+                    else if (y == 6)
+                    {
+                        if (d == null || d.Value.Owner != Player.White) return false;
+                    }
+                    else
+                    {
+                        if (d != null) return false;
+                    }
+                }
+            }
+            return true;
+        }
+
         public Die?[,] GetBoard() => Grid;
     }
 }
