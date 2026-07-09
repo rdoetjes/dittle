@@ -91,7 +91,7 @@ dotnet run -- -players 2
 - **AI DEPTH +/-**: Adjust the difficulty in real-time.
 
 ## Tests
-To run the xUnit test suite for rule validation:
+The test was done playing the game against itself.
 ```bash
-dotnet test DittleTests/DittleTests.csproj
+dittle -players -depth 3
 ```
