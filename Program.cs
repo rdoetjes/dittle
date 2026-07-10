@@ -93,6 +93,7 @@ namespace Dittle
         private static void ResetGame()
         {
             AI.CancelAi();
+            AI.Reseed();
             matchTime = 0;
             whiteThinkTime = 0;
             blackThinkTime = 0;

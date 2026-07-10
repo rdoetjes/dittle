@@ -39,6 +39,14 @@ namespace Dittle
             _aiCts = null;
         }
 
+        private static Random rng = new Random();
+        public static Random Rng => rng;
+
+        public static void Reseed()
+        {
+            rng = new Random();
+        }
+
         public static Move? GetBestMove(Board board, Player player, int depth)
         {
             List<Move> moves = Rules.GetAllLegalMoves(board, player);
@@ -69,8 +77,8 @@ namespace Dittle
             // Collect all moves that share the best score
             var bestMoves = moveEvaluations.FindAll(m => m.score == bestVal);
 
-            // Use a static or shared Random to ensure better distribution
-            return bestMoves[Random.Shared.Next(bestMoves.Count)].move;
+            // Use a shared Random to ensure variety, with ability to reseed
+            return bestMoves[rng.Next(bestMoves.Count)].move;
         }
 
         private static int Minimax(Board board, int depth, int alpha, int beta, bool maximizing, Player player)
