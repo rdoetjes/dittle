@@ -244,12 +244,16 @@ namespace Dittle
             }
 
             // The number of horizontal move indicators
-            int wEnd = DrawHorizontalMoves(Player.White, (uint)state.Board.WhiteHorizontalMoves);
-            int bEnd = DrawHorizontalMoves(Player.Black, (uint)state.Board.BlackHorizontalMoves);
-
-            // Think times and scores after the LEDs
             int boardHeight = 7 * OFFSET;
             int startY = (BOARD_SIZE_Y - boardHeight) / 2;
+            int startX = (BOARD_SIZE_X - 7 * OFFSET) / 2;
+
+            // Draw rectangles around stats
+            Raylib.DrawRectangleLinesEx(new Rectangle(startX - 5, startY - 30, BOARD_SIZE_X - 2 * startX + 10, 25), 3, new Color(101, 67, 33, 150)); // Black stats
+            Raylib.DrawRectangleLinesEx(new Rectangle(startX - 5, startY + boardHeight + 5, BOARD_SIZE_X - 2 * startX + 10, 25), 3, new Color(101, 67, 33, 150)); // White stats
+
+            int wEnd = DrawHorizontalMoves(Player.White, (uint)state.Board.WhiteHorizontalMoves);
+            int bEnd = DrawHorizontalMoves(Player.Black, (uint)state.Board.BlackHorizontalMoves);
 
             string wThink = $"{state.WhiteThinkTime:F1}s";
             string bThink = $"{state.BlackThinkTime:F1}s";
