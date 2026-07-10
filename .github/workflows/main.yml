@@ -39,10 +39,44 @@ jobs:
 
   build_artifacts:
     needs: ci
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     continue-on-error: false
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch all history for tagging
+
+      - name: Calculate Version
+        id: versioning
+        run: |
+          # Read base version (e.g., 1.0)
+          BASE_VER=$(cat version_base | tr -d '[:space:]')
+          
+          # Find the latest tag that starts with this base version
+          LATEST_TAG=$(git tag -l "${BASE_VER}.*" --sort=-v:refname | head -n 1)
+          
+          if [ -z "$LATEST_TAG" ]; then
+            NEW_TAG="${BASE_VER}.1"
+          else
+            # Increment the patch number
+            PATCH=$(echo $LATEST_TAG | awk -F. '{print $NF}')
+            NEW_PATCH=$((PATCH + 1))
+            NEW_TAG="${BASE_VER}.${NEW_PATCH}"
+          fi
+          
+          echo "tag=$NEW_TAG" >> $GITHUB_OUTPUT
+          echo "Calculated version: $NEW_TAG"
+
+      - name: Create and Push Tag
+        if: github.ref == 'refs/heads/main'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag ${{ steps.versioning.outputs.tag }}
+          git push origin ${{ steps.versioning.outputs.tag }}
 
       - name: Install .NET
         uses: actions/setup-dotnet@v4
@@ -74,9 +108,10 @@ jobs:
           # Get credentials from Vault
           pass=$(curl --fail -s -H "X-Vault-Token: ${{ secrets.VAULT_TOKEN }}" "${{ vars.VAULT_ADDR }}/v1/kv/data/prod/artifactory/ci" | jq -r '.data.data.password')
           iso=$(date +%Y%m%d%H%M)
-          
+
           # Base URL for Artifactory
-          BASE_URL="https://stratos01.phonax.com/artifactory/internal_test/dittle/$GITHUB_SHA"
+          VERSION="${{ steps.versioning.outputs.tag }}"
+          BASE_URL="https://stratos01.phonax.com/artifactory/internal_test/dittle/$VERSION"
 
           # 1. Upload Binary Artifacts
           for file in dist/*.{zip,tar.gz}; do
@@ -84,9 +119,9 @@ jobs:
             filename=$(basename "$file")
             
             if [[ $filename == *.tar.gz ]]; then
-              new_name="${filename%.tar.gz}-$iso.tar.gz"
+              new_name="${filename%.tar.gz}-$VERSION-$iso.tar.gz"
             else
-              new_name="${filename%.zip}-$iso.zip"
+              new_name="${filename%.zip}-$VERSION-$iso.zip"
             fi
 
             MD5=$(md5sum "$file" | awk '{print $1}')
@@ -101,7 +136,7 @@ jobs:
           # 2. Upload the single Source SBOM
           SBOM="dist/sbom.json"
           if [ -f "$SBOM" ]; then
-            new_name="dittle-sbom-$iso.json"
+            new_name="dittle-sbom-$VERSION-$iso.json"
             MD5_S=$(md5sum "$SBOM" | awk '{print $1}')
             SHA1_S=$(sha1sum "$SBOM" | awk '{print $1}')
             
