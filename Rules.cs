@@ -212,10 +212,10 @@ namespace Dittle
         public static bool IsGameOver(Board board, out Player? winner)
         {
             winner = null;
-            int yellowInBase = 0;
-            int greenInBase = 0;
-            int yellowScore = 0;
-            int greenScore = 0;
+            int whiteInBase = 0;
+            int blackInBase = 0;
+            int whiteScore = 0;
+            int blackScore = 0;
 
             for (int y = 0; y < Board.Size; y++)
             {
@@ -226,28 +226,28 @@ namespace Dittle
                     {
                         if (d.Value.Owner == Player.White && y == 0)
                         {
-                            yellowInBase++;
-                            yellowScore += d.Value.Top;
+                            whiteInBase++;
+                            whiteScore += d.Value.Top;
                         }
                         else if (d.Value.Owner == Player.Black && y == Board.Size - 1)
                         {
-                            greenInBase++;
-                            greenScore += d.Value.Top;
+                            blackInBase++;
+                            blackScore += d.Value.Top;
                         }
                     }
                 }
             }
 
             // Game ends when ONE player gets ALL 7 dice in the opponent's base row
-            if (yellowInBase == 7 || greenInBase == 7)
+            if (whiteInBase == 7 || blackInBase == 7)
             {
                 // Winner is the one with the higher score in their respective goal row
-                if (yellowScore > greenScore) winner = Player.White;
-                else if (greenScore > yellowScore) winner = Player.Black;
+                if (whiteScore > blackScore) winner = Player.White;
+                else if (blackScore > whiteScore) winner = Player.Black;
                 else
                 {
                     // Draw-breaker: the player who reached the goal row with all 7 dice wins
-                    winner = (yellowInBase == 7) ? Player.White : Player.Black;
+                    winner = (whiteInBase == 7) ? Player.White : Player.Black;
                 }
                 return true;
             }
@@ -256,8 +256,8 @@ namespace Dittle
 
         public static int Evaluate(Board board, Player player)
         {
-            int yellowTotal = 0;
-            int greenTotal = 0;
+            int whiteTotal = 0;
+            int blackTotal = 0;
 
             for (int y = 0; y < Board.Size; y++)
             {
@@ -269,14 +269,14 @@ namespace Dittle
                         if (d.Value.Owner == Player.White)
                         {
                             // Priority 1: High value in base row
-                            if (y == 0) yellowTotal += (d.Value.Top * 100);
+                            if (y == 0) whiteTotal += (d.Value.Top * 100);
                             // Priority 2: Getting into base row
-                            else yellowTotal += (6 - y) * 10 + d.Value.Top;
+                            else whiteTotal += (6 - y) * 10 + d.Value.Top;
                         }
                         else
                         {
-                            if (y == 6) greenTotal += (d.Value.Top * 100);
-                            else greenTotal += y * 10 + d.Value.Top;
+                            if (y == 6) blackTotal += (d.Value.Top * 100);
+                            else blackTotal += y * 10 + d.Value.Top;
                         }
                     }
                 }
@@ -289,7 +289,7 @@ namespace Dittle
                 if (winner != null) return -1000000;
             }
 
-            return (player == Player.White) ? (yellowTotal - greenTotal) : (greenTotal - yellowTotal);
+            return (player == Player.White) ? (whiteTotal - blackTotal) : (blackTotal - whiteTotal);
         }
     }
 }
