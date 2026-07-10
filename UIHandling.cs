@@ -26,12 +26,13 @@ namespace Dittle
             // Only allow Level adjustments if no moves have been made yet (Board is in initial state)
             if (board.WhiteHorizontalMoves == 0 && board.BlackHorizontalMoves == 0 && board.IsInitialBoard())
             {
-                if (Raylib.CheckCollisionPointRec(m, new Rectangle(210, Graphics.BOARD_SIZE_Y - 80, 40, 40)) && depth > 1)
+                int uiControlY = Graphics.BOARD_SIZE_Y - 60;
+                if (Raylib.CheckCollisionPointRec(m, new Rectangle(210, uiControlY, 40, 40)) && depth > 1)
                 {
                     depth--;
                     return true;
                 }
-                if (Raylib.CheckCollisionPointRec(m, new Rectangle(310, Graphics.BOARD_SIZE_Y - 80, 40, 40)) && depth < maxAiDepth)
+                if (Raylib.CheckCollisionPointRec(m, new Rectangle(310, uiControlY, 40, 40)) && depth < maxAiDepth)
                 {
                     depth++;
                     return true;
