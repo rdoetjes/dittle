@@ -59,7 +59,7 @@ jobs:
           LATEST_TAG=$(git tag -l "${BASE_VER}.*" --sort=-v:refname | head -n 1)
 
           if [ -z "$LATEST_TAG" ]; then
-            NEW_TAG="${BASE_VER}.1"
+            NEW_TAG="${BASE_VER}.0"
           else
             # Increment the patch number
             PATCH=$(echo $LATEST_TAG | awk -F. '{print $NF}')
