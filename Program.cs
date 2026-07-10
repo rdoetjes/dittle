@@ -136,6 +136,9 @@ namespace Dittle
 
             Graphics.DrawBoard(board, selectedX, selectedY, legalMoves);
 
+            // Calculate current scores (dice in opposite base row)
+            CalculateScores(out int scoreWhite, out int scoreBlack);
+
             var uiState = new UiState
             {
                 Depth = aiDepth,
@@ -145,6 +148,8 @@ namespace Dittle
                 MatchTime = matchTime,
                 WhiteThinkTime = whiteThinkTime,
                 BlackThinkTime = blackThinkTime,
+                ScoreWhite = scoreWhite,
+                ScoreBlack = scoreBlack,
                 IsAiThinking = isAiThinking
             };
 
@@ -153,6 +158,22 @@ namespace Dittle
             Graphics.DrawAiMoveHighlight(lastAiMove, aiMoveTimer);
 
             Raylib.EndDrawing();
+        }
+
+        private static void CalculateScores(out int scoreWhite, out int scoreBlack)
+        {
+            scoreWhite = 0;
+            scoreBlack = 0;
+            for (int x = 0; x < Board.Size; x++)
+            {
+                // White's goal is row 0
+                Die? dWhite = board.Grid[x, 0];
+                if (dWhite?.Owner == Player.White) scoreWhite += dWhite.Value.Top;
+
+                // Black's goal is row 6
+                Die? dBlack = board.Grid[x, 6];
+                if (dBlack?.Owner == Player.Black) scoreBlack += dBlack.Value.Top;
+            }
         }
 
         private static void Cleanup()

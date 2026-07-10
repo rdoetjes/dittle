@@ -14,6 +14,8 @@ namespace Dittle
         public float MatchTime;
         public float WhiteThinkTime;
         public float BlackThinkTime;
+        public int ScoreWhite;
+        public int ScoreBlack;
         public bool IsAiThinking;
     }
 
@@ -155,7 +157,7 @@ namespace Dittle
                 }
         }
 
-        public static void DrawHorizontalMoves(Player player, uint nrHorizontalMoves)
+        public static int DrawHorizontalMoves(Player player, uint nrHorizontalMoves)
         {
             int startX = (BOARD_SIZE_X - 7 * OFFSET) / 2;
             int boardHeight = 7 * OFFSET;
@@ -165,12 +167,18 @@ namespace Dittle
             int xPos = startX;
             int yPos = (player == Player.White) ? startY + boardHeight + 10 : startY - 25;
 
+            // Add labels before LEDs
+            string playerLabel = (player == Player.White) ? "WHITE: " : "BLACK: ";
+            int labelWidth = (int)Raylib.MeasureText(playerLabel, 14);
+            DrawTextCustom(playerLabel, xPos, yPos + 1, 14, Color.DarkBrown);
+
             int radius = 8;
             int spacing = 22;
+            int ledStartX = xPos + labelWidth + 5;
 
             for (int i = 0; i < 4; i++)
             {
-                int cx = xPos + i * spacing + radius;
+                int cx = ledStartX + i * spacing + radius;
                 int cy = yPos + radius;
 
                 if (i < nrHorizontalMoves)
@@ -192,6 +200,9 @@ namespace Dittle
                     Raylib.DrawCircle(cx - 2, cy - 2, (float)radius / 2, new(128, 128, 128, 200));
                 }
             }
+
+            // Return the end position for Think time and Score to use
+            return ledStartX + 4 * spacing + 10;
         }
 
         public static void DrawUI(UiState state)
@@ -200,7 +211,7 @@ namespace Dittle
             string matchTimeStr = $"TIME: {TimeSpan.FromSeconds(state.MatchTime):mm\\:ss}";
             DrawTextCustom(matchTimeStr, 10, 35, 18, Color.DarkBrown);
 
-            int uiControlY = BOARD_SIZE_Y - 80;
+            int uiControlY = BOARD_SIZE_Y - 60;
             Raylib.DrawRectangleLinesEx(new Rectangle(BOARD_SIZE_X - 120, 10, 100, 30), 2, Color.DarkBrown);
             DrawTextCustom(" RESTART", BOARD_SIZE_X - 110, 18, 16, Color.DarkBrown);
 
@@ -233,18 +244,24 @@ namespace Dittle
             }
 
             // The number of horizontal move indicators
-            DrawHorizontalMoves(Player.White, (uint)state.Board.WhiteHorizontalMoves);
-            DrawHorizontalMoves(Player.Black, (uint)state.Board.BlackHorizontalMoves);
+            int wEnd = DrawHorizontalMoves(Player.White, (uint)state.Board.WhiteHorizontalMoves);
+            int bEnd = DrawHorizontalMoves(Player.Black, (uint)state.Board.BlackHorizontalMoves);
 
-            // Think times next to LEDs
-            int startX = (BOARD_SIZE_X - 7 * OFFSET) / 2;
+            // Think times and scores after the LEDs
             int boardHeight = 7 * OFFSET;
             int startY = (BOARD_SIZE_Y - boardHeight) / 2;
 
             string wThink = $"{state.WhiteThinkTime:F1}s";
             string bThink = $"{state.BlackThinkTime:F1}s";
-            DrawTextCustom(wThink, startX + 4 * 22 + 20, startY + boardHeight + 10, 16, Color.DarkBrown);
-            DrawTextCustom(bThink, startX + 4 * 22 + 20, startY - 25, 16, Color.DarkBrown);
+
+            string wScoreText = $"SCORE: {state.ScoreWhite}";
+            string bScoreText = $"SCORE: {state.ScoreBlack}";
+
+            DrawTextCustom(wThink, wEnd, startY + boardHeight + 10, 16, Color.DarkBrown);
+            DrawTextCustom(wScoreText, wEnd + 55, startY + boardHeight + 10, 16, Color.DarkBrown);
+
+            DrawTextCustom(bThink, bEnd, startY - 25, 16, Color.DarkBrown);
+            DrawTextCustom(bScoreText, bEnd + 55, startY - 25, 16, Color.DarkBrown);
         }
 
         public static void DrawAiMoveHighlight(Move? lastMove, float timer)
