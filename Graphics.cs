@@ -255,17 +255,19 @@ namespace Dittle
             int wEnd = DrawHorizontalMoves(Player.White, (uint)state.Board.WhiteHorizontalMoves);
             int bEnd = DrawHorizontalMoves(Player.Black, (uint)state.Board.BlackHorizontalMoves);
 
-            string wThink = $"{state.WhiteThinkTime:F1}s";
-            string bThink = $"{state.BlackThinkTime:F1}s";
+
+            string wThink = TimeSpan.FromSeconds(state.WhiteThinkTime).ToString(@"mm\:ss\.f");
+            string bThink = TimeSpan.FromSeconds(state.BlackThinkTime).ToString(@"mm\:ss\.f");
+
 
             string wScoreText = $"SCORE: {state.ScoreWhite}";
             string bScoreText = $"SCORE: {state.ScoreBlack}";
 
             DrawTextCustom(wThink, wEnd, startY + boardHeight + 10, 16, Color.DarkBrown);
-            DrawTextCustom(wScoreText, wEnd + 55, startY + boardHeight + 10, 16, Color.DarkBrown);
+            DrawTextCustom(wScoreText, wEnd + 80, startY + boardHeight + 10, 16, Color.DarkBrown);
 
             DrawTextCustom(bThink, bEnd, startY - 25, 16, Color.DarkBrown);
-            DrawTextCustom(bScoreText, bEnd + 55, startY - 25, 16, Color.DarkBrown);
+            DrawTextCustom(bScoreText, bEnd + 80, startY - 25, 16, Color.DarkBrown);
         }
 
         public static void DrawAiMoveHighlight(Move? lastMove, float timer)
