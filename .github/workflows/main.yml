@@ -30,6 +30,13 @@ jobs:
           echo "Running vulnerability scan..."
           grype sbom.cdx.json
 
+      - name: Upload SBOM to GitHub Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: source-sbom
+          path: sbom.cdx.json
+          retention-days: 1
+
   build_artifacts:
     needs: ci
     runs-on: ubuntu-latest
@@ -50,16 +57,14 @@ jobs:
       - name: Make Dist
         run: make dist
 
-      - name: Generate SBOMs for each artifact
-        run: |
-          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sudo sh -s -- -b /usr/local/bin
-          mkdir -p dist/sboms
-          for file in dist/*.{zip,tar.gz}; do
-            [ -e "$file" ] || continue
-            filename=$(basename "$file")
-            echo "Generating SBOM for $filename"
-            syft "$file" --source-name "dittle" --output cyclonedx-json@1.5="dist/sboms/${filename}.sbom.json"
-          done
+      - name: Download SBOM from GitHub Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: source-sbom
+          path: dist
+
+      - name: Rename SBOM for upload
+        run: mv dist/sbom.cdx.json dist/sbom.json
 
       - name: Upload to Artifactory and Vault
         if: github.ref == 'refs/heads/main'
@@ -73,12 +78,11 @@ jobs:
           # Base URL for Artifactory
           BASE_URL="https://stratos01.phonax.com/artifactory/internal_test/dittle/$GITHUB_SHA"
 
-          # Upload artifacts
+          # 1. Upload Binary Artifacts
           for file in dist/*.{zip,tar.gz}; do
             [ -e "$file" ] || continue
             filename=$(basename "$file")
             
-            # Add timestamp to filename before extension
             if [[ $filename == *.tar.gz ]]; then
               new_name="${filename%.tar.gz}-$iso.tar.gz"
             else
@@ -94,24 +98,15 @@ jobs:
               "$BASE_URL/$new_name"
           done
 
-          # Upload SBOMs
-          for file in dist/sboms/*.json; do
-            [ -e "$file" ] || continue
-            filename=$(basename "$file")
-            # dittle-linux-x64.tar.gz.sbom.json -> dittle-linux-x64-sbom-timestamp.json
-            new_name="${filename%.sbom.json}"
-            if [[ $new_name == *.tar.gz ]]; then
-              new_name="${new_name%.tar.gz}"
-            else
-              new_name="${new_name%.zip}"
-            fi
-            new_name="${new_name}-sbom-$iso.json"
-
-            MD5=$(md5sum "$file" | awk '{print $1}')
-            SHA1=$(sha1sum "$file" | awk '{print $1}')
+          # 2. Upload the single Source SBOM
+          SBOM="dist/sbom.json"
+          if [ -f "$SBOM" ]; then
+            new_name="dittle-sbom-$iso.json"
+            MD5_S=$(md5sum "$SBOM" | awk '{print $1}')
+            SHA1_S=$(sha1sum "$SBOM" | awk '{print $1}')
             
-            echo "Uploading SBOM $filename as $new_name"
-            curl --fail-with-body -s -u "ci:$pass" -X PUT -T "$file" \
-              -H "X-Checksum-Md5: $MD5" -H "X-Checksum-Sha1: $SHA1" \
+            echo "Uploading Source SBOM as $new_name"
+            curl --fail-with-body -s -u "ci:$pass" -X PUT -T "$SBOM" \
+              -H "X-Checksum-Md5: $MD5_S" -H "X-Checksum-Sha1: $SHA1_S" \
               "$BASE_URL/$new_name"
-          done
+          fi
