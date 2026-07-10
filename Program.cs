@@ -7,7 +7,7 @@ namespace Dittle
     class Program
     {
         public const int DefaultAiDepth = 3;
-        public const int MaxAiDepth = 7;
+        public const int MaxAiDepth = 6;
 
         // Game State
         private static Board board = new();
