@@ -54,10 +54,10 @@ jobs:
         run: |
           # Read base version (e.g., 1.0)
           BASE_VER=$(cat version_base | tr -d '[:space:]')
-          
+
           # Find the latest tag that starts with this base version
           LATEST_TAG=$(git tag -l "${BASE_VER}.*" --sort=-v:refname | head -n 1)
-          
+
           if [ -z "$LATEST_TAG" ]; then
             NEW_TAG="${BASE_VER}.1"
           else
@@ -66,7 +66,7 @@ jobs:
             NEW_PATCH=$((PATCH + 1))
             NEW_TAG="${BASE_VER}.${NEW_PATCH}"
           fi
-          
+
           echo "tag=$NEW_TAG" >> $GITHUB_OUTPUT
           echo "Calculated version: $NEW_TAG"
 
@@ -111,13 +111,13 @@ jobs:
 
           # Base URL for Artifactory
           VERSION="${{ steps.versioning.outputs.tag }}"
-          BASE_URL="https://stratos01.phonax.com/artifactory/internal_test/dittle/$VERSION"
+          BASE_URL="https://stratos01.phonax.com/artifactory/internal_release/dittle/$VERSION"
 
           # 1. Upload Binary Artifacts
           for file in dist/*.{zip,tar.gz}; do
             [ -e "$file" ] || continue
             filename=$(basename "$file")
-            
+
             if [[ $filename == *.tar.gz ]]; then
               new_name="${filename%.tar.gz}-$VERSION-$iso.tar.gz"
             else
@@ -126,7 +126,7 @@ jobs:
 
             MD5=$(md5sum "$file" | awk '{print $1}')
             SHA1=$(sha1sum "$file" | awk '{print $1}')
-            
+
             echo "Uploading $filename as $new_name"
             curl --fail-with-body -s -u "ci:$pass" -X PUT -T "$file" \
               -H "X-Checksum-Md5: $MD5" -H "X-Checksum-Sha1: $SHA1" \
@@ -139,7 +139,7 @@ jobs:
             new_name="dittle-sbom-$VERSION-$iso.json"
             MD5_S=$(md5sum "$SBOM" | awk '{print $1}')
             SHA1_S=$(sha1sum "$SBOM" | awk '{print $1}')
-            
+
             echo "Uploading Source SBOM as $new_name"
             curl --fail-with-body -s -u "ci:$pass" -X PUT -T "$SBOM" \
               -H "X-Checksum-Md5: $MD5_S" -H "X-Checksum-Sha1: $SHA1_S" \
