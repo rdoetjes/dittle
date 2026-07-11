@@ -63,7 +63,7 @@ jobs:
         run: |
           set -e
           # Read base version (e.g., 1.0)
-          BASE_VER=$(cat version_base | tr -d '[:space:]')
+          BASE_VER=$(cat dittle/version_base | tr -d '[:space:]')
 
           # Find the latest tag that starts with this base version
           LATEST_TAG=$(git tag -l "${BASE_VER}.*" --sort=-v:refname | head -n 1)
@@ -99,10 +99,11 @@ jobs:
           sudo apt-get install -y zip tar
 
       - name: Make Dist
-        working-directory: dittle
         env:
           VERSION: ${{ steps.versioning.outputs.tag }}
-        run: make dist
+        run: |
+          cd dittle
+          make dist
 
       - name: Download SBOM from GitHub Artifacts
         uses: actions/download-artifact@v4
