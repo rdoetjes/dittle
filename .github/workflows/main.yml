@@ -121,7 +121,6 @@ jobs:
         env:
           VERSION: ${{ steps.versioning.outputs.tag }}
         run: |
-          cd dittle
           make dist
 
       - name: Download SBOM from GitHub Artifacts
