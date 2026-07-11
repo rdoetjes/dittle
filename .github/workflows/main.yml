@@ -21,6 +21,11 @@ jobs:
           sudo apt-get install -y gitleaks
           gitleaks detect --source $GITHUB_WORKSPACE --log-opts="-p -n 1"
 
+      - name: Run Unit tests
+        run: |
+            set -w
+            dotnet test Tests/Tests.csproj
+
       - name: check supply chain attacks
         run: |
           curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sudo sh -s -- -b /usr/local/bin
