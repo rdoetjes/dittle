@@ -43,6 +43,9 @@ for arch in "osx-arm64" "osx-x64"; do
         cp "$PUBLISH_DIR/$arch/publish/$APP_NAME" "$BUNDLE_PATH/Contents/MacOS/"
         chmod +x "$BUNDLE_PATH/Contents/MacOS/$APP_NAME"
         
+        # Ad-hoc sign the binary (helps with Gatekeeper on some systems)
+        codesign --force --deep --sign - "$BUNDLE_PATH/Contents/MacOS/$APP_NAME"
+        
         # Copy libraylib.dylib if it exists in the publish folder
         if [ -f "$PUBLISH_DIR/$arch/publish/libraylib.dylib" ]; then
             cp "$PUBLISH_DIR/$arch/publish/libraylib.dylib" "$BUNDLE_PATH/Contents/MacOS/"
@@ -74,6 +77,9 @@ for arch in "osx-arm64" "osx-x64"; do
 </dict>
 </plist>
 EOF
+        # Ad-hoc sign the entire bundle
+        codesign --force --deep --sign - "$BUNDLE_PATH"
+
         # Zip from inside the dist folder to avoid path nesting
         cd "$DIST_DIR"
         zip -ry "${APP_NAME}-${arch}.zip" "$BUNDLE_NAME"
