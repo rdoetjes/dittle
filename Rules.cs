@@ -154,40 +154,21 @@ namespace Dittle
 
         private static void AddLongLJump(Board board, int originalX, int originalY, int fromX, int fromY, int dx1, int dy1, int dx2, int dy2, Die die, List<Move> moves)
         {
+            // First leg: MUST jump over exactly one immediately adjacent die into a gap
             int tx = fromX + dx1;
             int ty = fromY + dy1;
 
-            // Must start by jumping over an immediately adjacent die
             if (!board.IsInBounds(tx, ty) || !IsOccupied(board, tx, ty, originalX, originalY)) return;
 
-            bool onDie = true;
-            int diceJumpedFirstLeg = 1; // Start with the first die
             tx += dx1;
             ty += dy1;
 
-            while (board.IsInBounds(tx, ty))
-            {
-                bool occupied = IsOccupied(board, tx, ty, originalX, originalY);
-                if (onDie)
-                {
-                    if (occupied) return; // Illegal: tight cluster
-                    onDie = false;
-                    // We found a valid gap in the first leg. 
-                    // Now try to branch off for the second leg from here.
-                    AddSecondLegLong(board, originalX, originalY, tx, ty, dx2, dy2, die, moves, diceJumpedFirstLeg);
-                }
-                else
-                {
-                    if (occupied)
-                    {
-                        onDie = true;
-                        diceJumpedFirstLeg++;
-                    }
-                    else return; // Stop at multiple gaps
-                }
-                tx += dx1;
-                ty += dy1;
-            }
+            // Must land in a gap to turn
+            if (!board.IsInBounds(tx, ty) || IsOccupied(board, tx, ty, originalX, originalY)) return;
+
+            // We are in the gap after the first jump leg (exactly one die jumped).
+            // Now start second leg which can jump over one or more dice.
+            AddSecondLegLong(board, originalX, originalY, tx, ty, dx2, dy2, die, moves, 1);
         }
 
         private static void AddSecondLegLong(Board board, int originalX, int originalY, int fromX, int fromY, int dx, int dy, Die die, List<Move> moves, int diceJumpedFirstLeg)
