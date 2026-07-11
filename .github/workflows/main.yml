@@ -23,7 +23,7 @@ jobs:
 
       - name: Run Unit tests
         run: |
-            set -w
+            set -e
             dotnet test Tests/Tests.csproj
 
       - name: check supply chain attacks
