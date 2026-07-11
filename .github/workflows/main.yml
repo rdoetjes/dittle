@@ -64,9 +64,11 @@ jobs:
           set -e
           # Read base version (e.g., 1.0)
           BASE_VER=$(cat dittle/version_base | tr -d '[:space:]')
+          echo "Base version: $BASE_VER"
 
           # Find the latest tag that starts with this base version
           LATEST_TAG=$(git tag -l "${BASE_VER}.*" --sort=-v:refname | head -n 1)
+          echo "Latest tag found: $LATEST_TAG"
 
           if [ -z "$LATEST_TAG" ]; then
             NEW_TAG="${BASE_VER}.0"
