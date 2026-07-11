@@ -4,20 +4,22 @@
 
 APP_NAME="dittle"
 
-# Calculate Version
-BASE_VER=$(cat version_base | tr -d '[:space:]')
-# Check if we are in a git repo to get the tag
-if git rev-parse --is-inside-work-tree > /dev/null 2>&1; then
-    LATEST_TAG=$(git tag -l "${BASE_VER}.*" --sort=-v:refname | head -n 1)
-    if [ -z "$LATEST_TAG" ]; then
-        VERSION="${BASE_VER}.0"
+# Calculate Version (Use VERSION env var if set, otherwise calculate)
+if [ -z "$VERSION" ]; then
+    BASE_VER=$(cat version_base | tr -d '[:space:]')
+    # Check if we are in a git repo to get the tag
+    if git rev-parse --is-inside-work-tree > /dev/null 2>&1; then
+        LATEST_TAG=$(git tag -l "${BASE_VER}.*" --sort=-v:refname | head -n 1)
+        if [ -z "$LATEST_TAG" ]; then
+            VERSION="${BASE_VER}.0"
+        else
+            PATCH=$(echo $LATEST_TAG | awk -F. '{print $NF}')
+            NEW_PATCH=$((PATCH + 1))
+            VERSION="${BASE_VER}.${NEW_PATCH}"
+        fi
     else
-        PATCH=$(echo $LATEST_TAG | awk -F. '{print $NF}')
-        NEW_PATCH=$((PATCH + 1))
-        VERSION="${BASE_VER}.${NEW_PATCH}"
+        VERSION="${BASE_VER}.local"
     fi
-else
-    VERSION="${BASE_VER}.local"
 fi
 
 echo "Packaging version: $VERSION"

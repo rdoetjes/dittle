@@ -99,6 +99,9 @@ jobs:
           sudo apt-get install -y zip tar
 
       - name: Make Dist
+        working-directory: dittle
+        env:
+          VERSION: ${{ steps.versioning.outputs.tag }}
         run: make dist
 
       - name: Download SBOM from GitHub Artifacts
