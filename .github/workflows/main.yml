@@ -21,11 +21,6 @@ jobs:
           sudo apt-get install -y gitleaks
           gitleaks detect --source $GITHUB_WORKSPACE --log-opts="-p -n 1"
 
-      - name: Run Unit tests
-        run: |
-            set -e
-            dotnet test Tests/Tests.csproj
-
       - name: check supply chain attacks
         run: |
           curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sudo sh -s -- -b /usr/local/bin
@@ -41,6 +36,14 @@ jobs:
           name: source-sbom
           path: sbom.cdx.json
           retention-days: 1
+
+      - name: Install .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Run Unit Tests
+        run: dotnet test Tests/Tests.csproj
 
   build_artifacts:
     needs: ci

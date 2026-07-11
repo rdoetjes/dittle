@@ -20,7 +20,9 @@ namespace Dittle.Tests
         public void TiltMove_UpdatesDieFacesCorrectly()
         {
             var board = new Board();
-            var die = board.Grid[0, 6].Value;
+            var dieNullable = board.Grid[0, 6];
+            Assert.True(dieNullable.HasValue, "Initial board should have a die at (0,6)");
+            var die = dieNullable.Value;
             
             // Tilt forward (Up for White, dy=-1)
             var tilted = die.Tilted(0, -1);
