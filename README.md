@@ -6,6 +6,8 @@ A digital implementation of the strategy board game **Dittle**, built using C#, 
 
 ## The Rules of Dittle
 
+[Official Dittle Rules](https://officialgamerules.org/game-rules/dittle-dice-battle-rules/)
+
 Dittle is a two-player strategy game played on a 7x7 board. The goal is to move all seven of your dice into your opponent’s base row and win by having the highest combined face value at the end.
 
 ### Setup
@@ -40,6 +42,15 @@ Movement is restricted to **forward** or **sideways** (no backward or diagonal m
 **Legal L-Jump:**
 ```
 . . L
+. . X
+D X .
+
+or long L jump
+
+. . L
+. . .
+. . X
+. . .
 . . X
 D X .
 ```
