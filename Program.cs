@@ -40,7 +40,7 @@ namespace Dittle
             Graphics.InitializeResourcePath();
             ParseArguments(args);
 
-            Raylib.InitWindow(Graphics.BOARD_SIZE_X, Graphics.BOARD_SIZE_Y, "Dittle 1.0.8");
+            Raylib.InitWindow(Graphics.BOARD_SIZE_X, Graphics.BOARD_SIZE_Y, "Dittle");
             Raylib.SetTargetFPS(30);
             Graphics.LoadResources();
         }
