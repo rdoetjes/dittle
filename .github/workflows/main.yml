@@ -14,6 +14,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Run Unit Tests
+        run: dotnet test Tests/Tests.csproj
+
       - name: Check for leaks in the code
         run: |
           set -e
@@ -36,14 +44,6 @@ jobs:
           name: source-sbom
           path: sbom.cdx.json
           retention-days: 1
-
-      - name: Install .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '10.0.x'
-
-      - name: Run Unit Tests
-        run: dotnet test Tests/Tests.csproj
 
   build_artifacts:
     needs: ci
