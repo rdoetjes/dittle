@@ -60,11 +60,10 @@ jobs:
 
       - name: Calculate Version
         id: versioning
-        working-directory: dittle
         run: |
           set -e
           # Read base version (e.g., 1.0)
-          BASE_VER=$(cat version_base | tr -d '[:space:]')
+          BASE_VER=$(cat dittle/version_base | tr -d '[:space:]')
           echo "Base version: $BASE_VER"
 
           # Find the latest tag that starts with this base version
