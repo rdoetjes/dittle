@@ -17,6 +17,10 @@ namespace Dittle
         public int ScoreWhite;
         public int ScoreBlack;
         public bool IsAiThinking;
+        public int? SelectedX;
+        public int? SelectedY;
+        public List<Move> LegalMoves;
+        public Move? LastAiMove;
     }
 
     public static class Graphics

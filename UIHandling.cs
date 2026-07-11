@@ -6,7 +6,7 @@ namespace Dittle
 {
     public static class UIHandling
     {
-        public static bool HandleUIInput(ref Board board, ref Player current, ref int depth, ref int? selX, ref int? selY, ref List<Move> moves, ref Move? lastAi, int maxAiDepth)
+        public static bool HandleUIInput(ref UiState state)
         {
             if (!Raylib.IsMouseButtonPressed(MouseButton.Left)) return false;
             Vector2 m = Raylib.GetMousePosition();
@@ -14,27 +14,27 @@ namespace Dittle
             // Restart is always allowed
             if (Raylib.CheckCollisionPointRec(m, new Rectangle(Graphics.BOARD_SIZE_X - 120, 10, 100, 30)))
             {
-                board = new Board();
-                current = Player.White;
-                selX = null;
-                selY = null;
-                moves.Clear();
-                lastAi = null;
+                state.Board = new Board();
+                state.CurrentTurn = Player.White;
+                state.SelectedX = null;
+                state.SelectedY = null;
+                state.LegalMoves.Clear();
+                state.LastAiMove = null;
                 return true;
             }
 
             // Only allow Level adjustments if no moves have been made yet (Board is in initial state)
-            if (board.WhiteHorizontalMoves == 0 && board.BlackHorizontalMoves == 0 && board.IsInitialBoard())
+            if (state.Board.WhiteHorizontalMoves == 0 && state.Board.BlackHorizontalMoves == 0 && state.Board.IsInitialBoard())
             {
                 int uiControlY = Graphics.BOARD_SIZE_Y - 60;
-                if (Raylib.CheckCollisionPointRec(m, new Rectangle(210, uiControlY, 40, 40)) && depth > 1)
+                if (Raylib.CheckCollisionPointRec(m, new Rectangle(210, uiControlY, 40, 40)) && state.Depth > 1)
                 {
-                    depth--;
+                    state.Depth--;
                     return true;
                 }
-                if (Raylib.CheckCollisionPointRec(m, new Rectangle(310, uiControlY, 40, 40)) && depth < maxAiDepth)
+                if (Raylib.CheckCollisionPointRec(m, new Rectangle(310, uiControlY, 40, 40)) && state.Depth < state.MaxAiDepth)
                 {
-                    depth++;
+                    state.Depth++;
                     return true;
                 }
             }
@@ -42,7 +42,7 @@ namespace Dittle
             return false;
         }
 
-        public static void HandleBoardInput(Board board, ref Player currentPlayer, ref int? selX, ref int? selY, ref List<Move> moves)
+        public static void HandleBoardInput(ref UiState state)
         {
             if (!Raylib.IsMouseButtonPressed(MouseButton.Left)) return;
             Vector2 mouse = Raylib.GetMousePosition();
@@ -50,21 +50,21 @@ namespace Dittle
             int startY = (Graphics.BOARD_SIZE_Y - 7 * Graphics.OFFSET) / 2;
             int x = (int)((mouse.X - startX) / Graphics.OFFSET);
             int y = (int)((mouse.Y - startY) / Graphics.OFFSET);
-            if (!board.IsInBounds(x, y)) return;
+            if (!state.Board.IsInBounds(x, y)) return;
 
-            if (selX == null)
+            if (state.SelectedX == null)
             {
-                if (board.Grid[x, y]?.Owner == currentPlayer)
+                if (state.Board.Grid[x, y]?.Owner == state.CurrentTurn)
                 {
-                    var allLegalMoves = Rules.GetAllLegalMoves(board, currentPlayer);
+                    var allLegalMoves = Rules.GetAllLegalMoves(state.Board, state.CurrentTurn);
                     var possibleMovesForDie = allLegalMoves.FindAll(m => m.FromX == x && m.FromY == y);
 
                     // If valid move select that valid move based on current x and y click value.
                     if (possibleMovesForDie.Count > 0)
                     {
-                        selX = x;
-                        selY = y;
-                        moves = possibleMovesForDie;
+                        state.SelectedX = x;
+                        state.SelectedY = y;
+                        state.LegalMoves = possibleMovesForDie;
                     }
                     // If no moves for this die, we don't select it,
                     // allowing the user to click another die immediately.
@@ -73,14 +73,14 @@ namespace Dittle
             else
             {
                 int tx = x, ty = y;
-                int moveIdx = moves.FindIndex(m => m.ToX == tx && m.ToY == ty);
+                int moveIdx = state.LegalMoves.FindIndex(m => m.ToX == tx && m.ToY == ty);
                 if (moveIdx != -1)
                 {
-                    AI.ApplyMove(board, moves[moveIdx]);
+                    AI.ApplyMove(state.Board, state.LegalMoves[moveIdx]);
                 }
-                selX = null;
-                selY = null;
-                moves.Clear();
+                state.SelectedX = null;
+                state.SelectedY = null;
+                state.LegalMoves.Clear();
             }
         }
     }
