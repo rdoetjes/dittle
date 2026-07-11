@@ -31,6 +31,7 @@ jobs:
 
       - name: check supply chain attacks
         run: |
+          set -e
           curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sudo sh -s -- -b /usr/local/bin
           curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sudo sh -s -- -b /usr/local/bin
           echo "Creating SBOM..."
@@ -60,6 +61,7 @@ jobs:
       - name: Calculate Version
         id: versioning
         run: |
+          set -e
           # Read base version (e.g., 1.0)
           BASE_VER=$(cat version_base | tr -d '[:space:]')
 
