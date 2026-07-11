@@ -291,5 +291,21 @@ namespace Dittle
 
             return (player == Player.White) ? (whiteTotal - blackTotal) : (blackTotal - whiteTotal);
         }
+
+        public static void CalculateScores(Board board, out int scoreWhite, out int scoreBlack)
+        {
+            scoreWhite = 0;
+            scoreBlack = 0;
+            for (int x = 0; x < Board.Size; x++)
+            {
+                // White's goal is row 0
+                Die? dWhite = board.Grid[x, 0];
+                if (dWhite?.Owner == Player.White) scoreWhite += dWhite.Value.Top;
+
+                // Black's goal is row 6
+                Die? dBlack = board.Grid[x, 6];
+                if (dBlack?.Owner == Player.Black) scoreBlack += dBlack.Value.Top;
+            }
+        }
     }
 }

@@ -54,6 +54,14 @@ namespace Dittle
             }
         }
 
+        private static void UpdateUiState()
+        {
+            Rules.CalculateScores(state.Board, out int scoreWhite, out int scoreBlack);
+            state.ScoreWhite = scoreWhite;
+            state.ScoreBlack = scoreBlack;
+            state.CurrentTurn = state.Board.CurrentTurn;
+        }
+
         private static void Update()
         {
             float deltaTime = Raylib.GetFrameTime();
@@ -61,6 +69,7 @@ namespace Dittle
 
             UpdateTimers(deltaTime);
             HandleInput();
+            UpdateUiState();
 
             if (!Rules.IsGameOver(state.Board, out _))
             {
@@ -135,33 +144,11 @@ namespace Dittle
 
             Graphics.DrawBoard(state.Board, state.SelectedX, state.SelectedY, state.LegalMoves);
 
-            // Calculate current scores (dice in opposite base row)
-            CalculateScores(out int scoreWhite, out int scoreBlack);
-            state.ScoreWhite = scoreWhite;
-            state.ScoreBlack = scoreBlack;
-            state.CurrentTurn = state.Board.CurrentTurn;
-
             Graphics.DrawUI(state);
 
             Graphics.DrawAiMoveHighlight(state.LastAiMove, aiMoveTimer);
 
             Raylib.EndDrawing();
-        }
-
-        private static void CalculateScores(out int scoreWhite, out int scoreBlack)
-        {
-            scoreWhite = 0;
-            scoreBlack = 0;
-            for (int x = 0; x < Board.Size; x++)
-            {
-                // White's goal is row 0
-                Die? dWhite = state.Board.Grid[x, 0];
-                if (dWhite?.Owner == Player.White) scoreWhite += dWhite.Value.Top;
-
-                // Black's goal is row 6
-                Die? dBlack = state.Board.Grid[x, 6];
-                if (dBlack?.Owner == Player.Black) scoreBlack += dBlack.Value.Top;
-            }
         }
 
         private static void Cleanup()
