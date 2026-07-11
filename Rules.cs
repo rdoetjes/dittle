@@ -7,11 +7,13 @@ namespace Dittle
     {
         public int FromX, FromY, ToX, ToY;
         public Die ResultDie;
+        public bool IsLongLJump;
 
-        public Move(int fx, int fy, int tx, int ty, Die rd)
+        public Move(int fx, int fy, int tx, int ty, Die rd, bool isLongLJump = false)
         {
             FromX = fx; FromY = fy; ToX = tx; ToY = ty;
             ResultDie = rd;
+            IsLongLJump = isLongLJump;
         }
     }
 
@@ -141,46 +143,89 @@ namespace Dittle
 
         private static void AddLJump(Board board, int originalX, int originalY, int fromX, int fromY, int forwardY, Die die, List<Move> moves)
         {
-            // Vertical then Horizontal
-            foreach (int dx in new[] { 1, -1 })
-                AddLJumpSegments(board, originalX, originalY, fromX, fromY, 0, forwardY, dx, 0, die, moves);
+            // First leg Vertical, then Second leg Horizontal
+            AddLongLJump(board, originalX, originalY, fromX, fromY, 0, forwardY, 1, 0, die, moves);
+            AddLongLJump(board, originalX, originalY, fromX, fromY, 0, forwardY, -1, 0, die, moves);
 
-            // Horizontal then Vertical
-            foreach (int dx in new[] { 1, -1 })
-                AddLJumpSegments(board, originalX, originalY, fromX, fromY, dx, 0, 0, forwardY, die, moves);
+            // First leg Horizontal, then Second leg Vertical
+            AddLongLJump(board, originalX, originalY, fromX, fromY, 1, 0, 0, forwardY, die, moves);
+            AddLongLJump(board, originalX, originalY, fromX, fromY, -1, 0, 0, forwardY, die, moves);
         }
 
-        private static void AddLJumpSegments(Board board, int originalX, int originalY, int fromX, int fromY, int dx1, int dy1, int dx2, int dy2, Die die, List<Move> moves)
+        private static void AddLongLJump(Board board, int originalX, int originalY, int fromX, int fromY, int dx1, int dy1, int dx2, int dy2, Die die, List<Move> moves)
         {
-            // First leg: Must jump over an IMMEDIATELY adjacent die
             int tx = fromX + dx1;
             int ty = fromY + dy1;
+
+            // Must start by jumping over an immediately adjacent die
             if (!board.IsInBounds(tx, ty) || !IsOccupied(board, tx, ty, originalX, originalY)) return;
 
-            // Move to the gap after that die
+            bool onDie = true;
+            int diceJumpedFirstLeg = 1; // Start with the first die
             tx += dx1;
             ty += dy1;
-            if (!board.IsInBounds(tx, ty) || IsOccupied(board, tx, ty, originalX, originalY)) return;
 
-            // We are in a gap after the first jump leg.
-            // Now start second leg from here (tx, ty)
-            AddSecondLeg(board, originalX, originalY, tx, ty, dx2, dy2, die, moves);
+            while (board.IsInBounds(tx, ty))
+            {
+                bool occupied = IsOccupied(board, tx, ty, originalX, originalY);
+                if (onDie)
+                {
+                    if (occupied) return; // Illegal: tight cluster
+                    onDie = false;
+                    // We found a valid gap in the first leg. 
+                    // Now try to branch off for the second leg from here.
+                    AddSecondLegLong(board, originalX, originalY, tx, ty, dx2, dy2, die, moves, diceJumpedFirstLeg);
+                }
+                else
+                {
+                    if (occupied)
+                    {
+                        onDie = true;
+                        diceJumpedFirstLeg++;
+                    }
+                    else return; // Stop at multiple gaps
+                }
+                tx += dx1;
+                ty += dy1;
+            }
         }
 
-        private static void AddSecondLeg(Board board, int originalX, int originalY, int fromX, int fromY, int dx, int dy, Die die, List<Move> moves)
+        private static void AddSecondLegLong(Board board, int originalX, int originalY, int fromX, int fromY, int dx, int dy, Die die, List<Move> moves, int diceJumpedFirstLeg)
         {
-            // Second leg: Must jump over an IMMEDIATELY adjacent die from current gap
             int tx = fromX + dx;
             int ty = fromY + dy;
+
+            // Second leg must also start by jumping over an immediately adjacent die from the gap
             if (!board.IsInBounds(tx, ty) || !IsOccupied(board, tx, ty, originalX, originalY)) return;
 
-            // Move to the gap after that die
+            bool onDie = true;
+            int diceJumpedSecondLeg = 1; // Start with the first die
             tx += dx;
             ty += dy;
-            if (!board.IsInBounds(tx, ty) || IsOccupied(board, tx, ty, originalX, originalY)) return;
 
-            // Legal landing
-            moves.Add(new Move(originalX, originalY, tx, ty, die));
+            while (board.IsInBounds(tx, ty))
+            {
+                bool occupied = IsOccupied(board, tx, ty, originalX, originalY);
+                if (onDie)
+                {
+                    if (occupied) return; // Illegal: tight cluster
+                    onDie = false;
+                    // Legal landing spot in the second leg
+                    bool isLong = (diceJumpedFirstLeg > 1 || diceJumpedSecondLeg > 1);
+                    moves.Add(new Move(originalX, originalY, tx, ty, die, isLong));
+                }
+                else
+                {
+                    if (occupied)
+                    {
+                        onDie = true;
+                        diceJumpedSecondLeg++;
+                    }
+                    else return; // Stop at multiple gaps
+                }
+                tx += dx;
+                ty += dy;
+            }
         }
 
         private static bool IsOccupied(Board board, int x, int y, int originalX, int originalY)
