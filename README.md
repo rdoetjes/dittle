@@ -8,6 +8,10 @@ A digital implementation of the strategy board game **Dittle**, built using C#, 
 
 Dittle is a two-player strategy game played on a 7x7 board. The goal is to move all seven of your dice into your opponent’s base row and win by having the highest combined face value at the end.
 
+The rules here are slightly different than the board game.
+Here you must move forward after 4 horizontal moves, unless you can't.
+Also an L jump strictly goes over two dice. Whereas in the board game rules, the second leg of the L jump can be ove rmore than one die, assuming there are empty spaces in between the dice. This made the game too easy, as also AI vs AI showed.
+
 ### Setup
 - Seven dice per player, placed in their respective base rows.
 - All dice start with the **6** facing up and the **4** facing toward the center of the board.
