@@ -3,7 +3,30 @@
 # Run this from the dittle/ directory
 
 APP_NAME="dittle"
-VERSION="1.0.0"
+
+# Calculate Version
+BASE_VER=$(cat version_base | tr -d '[:space:]')
+# Check if we are in a git repo to get the tag
+if git rev-parse --is-inside-work-tree > /dev/null 2>&1; then
+    LATEST_TAG=$(git tag -l "${BASE_VER}.*" --sort=-v:refname | head -n 1)
+    if [ -z "$LATEST_TAG" ]; then
+        VERSION="${BASE_VER}.0"
+    else
+        PATCH=$(echo $LATEST_TAG | awk -F. '{print $NF}')
+        NEW_PATCH=$((PATCH + 1))
+        VERSION="${BASE_VER}.${NEW_PATCH}"
+    fi
+else
+    VERSION="${BASE_VER}.local"
+fi
+
+echo "Packaging version: $VERSION"
+
+# Update window title in Program.cs to include version
+# We use a regex that matches "Dittle" followed by any version or just "Dittle"
+cp Program.cs Program.cs.bak
+sed "s/Raylib.InitWindow(Graphics.BOARD_SIZE_X, Graphics.BOARD_SIZE_Y, \"Dittle[^\"]*\");/Raylib.InitWindow(Graphics.BOARD_SIZE_X, Graphics.BOARD_SIZE_Y, \"Dittle $VERSION\");/" Program.cs.bak > Program.cs
+
 PUBLISH_DIR="bin/Release/net10.0"
 DIST_DIR="dist"
 
@@ -87,6 +110,9 @@ EOF
         rm -rf "$BUNDLE_PATH"
     fi
 done
+
+# Removing the restore step so the version remains visible in Program.cs
+rm Program.cs.bak
 
 # 3. Windows (Zip)
 echo "Packaging Windows..."
